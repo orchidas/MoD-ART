@@ -78,7 +78,7 @@ def energy_contributions(mesh: TriangleMesh,
         raise ValueError('The position must be a 1D array of length 3.')
     
     if output_file_path is None:
-        print('\tNo output folder specified. Computing ray-tracing...')
+        print('\tNo output folder specified.\n\tComputing ray-tracing...')
         load_existing = False
     elif not os.path.isfile(output_file_path):
         print('\tOutput folder specified. File:\n\t\t', output_file_path)
@@ -539,6 +539,7 @@ def run_ART(folder_path: str,
 def run_MoDART(folder_path: str,
                source_positions: np.ndarray, listener_positions: np.ndarray,
                overwrite_sources: bool = False, overwrite_listeners: bool = False,
+               avoid_saving_residues: bool = True,
                echogram_sample_rate: float = 5e3,
                echogram_duration: float = 1.,
                num_rays: int = 1000,
@@ -567,6 +568,9 @@ def run_MoDART(folder_path: str,
         If True, compute ray-tracing from sources even if data already exists.
     overwrite_listeners: bool, default: False
         If True, compute ray-tracing from listeners even if data already exists.
+    avoid_saving_residues: bool, default: True
+        If True, always compute resiudes on the fly
+        (they're usually more memory-expensive than compute-expensive).
     echogram_sample_rate: float, default: 5e3
         Sample rate in Hz used to quantize propagation delays.
     echogram_duration: float, default: 1.0
@@ -584,7 +588,7 @@ def run_MoDART(folder_path: str,
         Atmospheric pressure (kPa) used for speed-of-sound computation.
 
     Returns
-    -------: numpy.ndarray
+    -------
     echograms
         An array of shape (S, L, B, T) where:
         - S is the number of sources (even if only one is given);
@@ -693,7 +697,7 @@ def run_MoDART(folder_path: str,
     # Create residue arrays of the required shapes.
     source_residues = np.zeros((num_sources, num_modes))
     listener_residues = np.zeros((num_listeners, num_modes))
-    
+
     # Evaluate the source residue components at each position, for each mode.
     for source_idx in range(num_sources):
         print('Processing source', source_idx+1)
@@ -705,6 +709,9 @@ def run_MoDART(folder_path: str,
             residue_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
+            residue_file_path = None
+        
+        if avoid_saving_residues:
             residue_file_path = None
         
         # The 2D array returned by this function is a distribution of energy
@@ -724,7 +731,7 @@ def run_MoDART(folder_path: str,
         if (residue_file_path is None
                 or not os.path.isfile(residue_file_path)
                 or overwrite_sources):
-            print('Computing residues...')
+            print('\tComputing residues...')
             for mode_idx in range(num_modes):
                 # For the residues, we need to compute the Z-transform of each
                 #   filter setting z at the pole value. See "ART_theory.md" for
@@ -743,7 +750,7 @@ def run_MoDART(folder_path: str,
             if residue_file_path is not None:
                 np.savetxt(residue_file_path, source_residues, fmt='%.18f', delimiter=', ')
         else:
-            print('Loading existing residues... File:\n\t', residue_file_path)
+            print('\tLoading existing residues... File:\n\t\t', residue_file_path)
             source_residues = np.loadtxt(residue_file_path, delimiter=',')
         
     # Evaluate the listener residue components at each position, for each mode.
@@ -757,6 +764,9 @@ def run_MoDART(folder_path: str,
             residue_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
+            residue_file_path = None
+        
+        if avoid_saving_residues:
             residue_file_path = None
         
         # The 2D array returned by this function is a distribution of energy
@@ -776,7 +786,7 @@ def run_MoDART(folder_path: str,
         if (residue_file_path is None
                 or not os.path.isfile(residue_file_path)
                 or overwrite_listeners):
-            # print('Computing residues...')
+            print('\tComputing residues...')
             for mode_idx in range(num_modes):
                 # For the residues, we need to compute the Z-transform of each
                 #   filter setting z at the pole value. See "ART_theory.md" for
@@ -795,7 +805,7 @@ def run_MoDART(folder_path: str,
             if residue_file_path is not None:
                 np.savetxt(residue_file_path, listener_residues, fmt='%.18f', delimiter=', ')
         else:
-            # print('Loading existing residues... File:\n\t', residue_file_path)
+            print('\tLoading existing residues... File:\n\t\t', residue_file_path)
             listener_residues = np.loadtxt(residue_file_path, delimiter=',')
     
     # Add the residues to the returned modal data.
