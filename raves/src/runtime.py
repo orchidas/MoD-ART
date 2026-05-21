@@ -1,11 +1,131 @@
 import os
 import warnings
 import numpy as np
-from scipy.sparse import csr_array, lil_array
+from tqdm import tqdm
+from scipy.sparse import csr_array, lil_array, issparse
 from scipy.io import mmread, mmwrite
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List, Union
 
 from .utils import RayBundle, TriangleMesh, load_all_inputs, load_frequencies, sound_speed
+
+Kernel = Union[csr_array, List[csr_array]]
+
+
+def _as_kernel_taps(kernel: Union[np.ndarray, csr_array, List[csr_array], Tuple[csr_array, ...]]) -> Kernel:
+    """
+    Normalize ART kernels to either one 2D sparse matrix or a list of 2D taps for filter matrices.
+    """
+    if isinstance(kernel, (list, tuple)):
+        if len(kernel) == 0:
+            raise ValueError('Kernel tap list cannot be empty.')
+
+        kernel_taps = [csr_array(kernel_tap) for kernel_tap in kernel]
+        tap_shape = kernel_taps[0].shape
+        if len(tap_shape) != 2 or tap_shape[0] != tap_shape[1]:
+            raise ValueError('Each kernel tap must be a square 2D array.')
+        if any(kernel_tap.shape != tap_shape for kernel_tap in kernel_taps):
+            raise ValueError('All kernel taps must have the same shape.')
+
+        return kernel_taps
+
+    if issparse(kernel):
+        kernel = csr_array(kernel)
+        if len(kernel.shape) != 2 or kernel.shape[0] != kernel.shape[1]:
+            raise ValueError('A sparse ART kernel must be a square 2D array.')
+        return kernel
+
+    kernel = np.asarray(kernel)
+    if kernel.ndim == 2:
+        if kernel.shape[0] != kernel.shape[1]:
+            raise ValueError('A dense ART kernel must be a square 2D array.')
+        return csr_array(kernel)
+    if kernel.ndim == 3:
+        if kernel.shape[0] != kernel.shape[1]:
+            raise ValueError('A dense 3D ART kernel must have square path dimensions.')
+        return [csr_array(kernel[:, :, tap_idx]) for tap_idx in range(kernel.shape[2])]
+
+    raise ValueError('ART kernel must be a 2D matrix, 3D tensor, or list of 2D taps.')
+
+
+def _load_art_kernel(folder_path: str, band_idx: int, operate_in_pressure_domain: bool = False) -> Kernel:
+    """
+    Load ART kernel for one band.
+
+    Legacy 2D kernels are loaded from Matrix Market `.mtx` files. TD kernels
+    can be stored as `.npz` using either dense key `A_full`/`arr_0` or sparse
+    coordinates `row`, `col`, `tap`, `data`, `shape`.
+    """
+    npz_path = os.path.join(folder_path, 'ART_kernel_band_{}.npz'.format(band_idx))
+    mtx_path = os.path.join(folder_path, 'ART_kernel_band_{}.mtx'.format(band_idx))
+
+    if operate_in_pressure_domain:
+        try:
+            with np.load(npz_path) as kernel_file:
+                keys = set(kernel_file.files)
+                if {'row', 'col', 'tap', 'data', 'shape'}.issubset(keys):
+                    shape = tuple(kernel_file['shape'].astype(int))
+                    if len(shape) != 3:
+                        raise ValueError('Sparse 3D ART kernel shape must have three dimensions.')
+
+                    num_rows, num_cols, num_taps = shape
+                    if num_rows != num_cols:
+                        raise ValueError('Sparse 3D ART kernel must have square path dimensions.')
+
+                    row = kernel_file['row'].astype(int)
+                    col = kernel_file['col'].astype(int)
+                    tap = kernel_file['tap'].astype(int)
+                    data = kernel_file['data']
+
+                    kernel_taps = list()
+                    for tap_idx in range(num_taps):
+                        tap_mask = tap == tap_idx
+                        kernel_taps.append(
+                            csr_array((data[tap_mask], (row[tap_mask], col[tap_mask])), shape=(num_rows, num_cols)))
+                    return kernel_taps
+
+                # Dense formats
+                if 'A_full' in keys:
+                    return _as_kernel_taps(kernel_file['A_full'])
+
+                if 'arr_0' in keys:
+                    return _as_kernel_taps(kernel_file['arr_0'])
+
+        except FileNotFoundError as e:
+            print(e)
+            print('No .npz file found, looking for .mtx file')
+
+    return _as_kernel_taps(mmread(mtx_path, spmatrix=True))
+
+
+def _apply_kernel_to_signal(kernel: Kernel, signal: np.ndarray) -> np.ndarray:
+    """
+    Apply a 2D ART kernel or a tap-wise 3D ART kernel to a path-time signal.
+    """
+    if isinstance(kernel, list):
+        output = np.zeros_like(signal)
+        num_samples = signal.shape[1]
+        for tap_idx, kernel_tap in enumerate(kernel):
+            if tap_idx >= num_samples:
+                break
+            output[:, tap_idx:] += kernel_tap @ signal[:, :num_samples - tap_idx]
+        return output
+
+    return kernel @ signal
+
+
+def _apply_kernel_to_sample(kernel: Kernel, state_vector: np.ndarray, output: np.ndarray, time_sample: int) -> None:
+    """
+    Reflect one incident path vector into the output path-time signal.
+    """
+    if isinstance(kernel, list):
+        num_samples = output.shape[1]
+        for tap_idx, kernel_tap in enumerate(kernel):
+            target_sample = time_sample + tap_idx
+            if target_sample >= num_samples:
+                break
+            output[:, target_sample] += kernel_tap @ state_vector
+    else:
+        output[:, time_sample] += kernel @ state_vector
 
 
 def energy_contributions(mesh: TriangleMesh,
@@ -15,8 +135,9 @@ def energy_contributions(mesh: TriangleMesh,
                          echogram_sample_rate: float,
                          num_rays: int = 1000,
                          output_file_path: str = None,
-                         humidity: float = 50., temperature: float = 20., pressure: float = 100.
-                         ) -> csr_array:
+                         humidity: float = 50.,
+                         temperature: float = 20.,
+                         pressure: float = 100.) -> csr_array:
     """
     Trace rays from one position and gather them into propagation paths.
 
@@ -61,22 +182,22 @@ def energy_contributions(mesh: TriangleMesh,
     contributions: scipy.sparse.csr_array
         A csr_array of shape (N, M), where N is the number of propagation paths
         and M is the time delay (in samples) of the latest contribution.
-    
+
     Notes
     -----
     The results are dependent on the selected sampe rate, which needs to be
     compensated when building echograms. Consider specifying the sample rate
     in the name of the file or directory.
-    
+
     The output array, being in CSR format, allows easy access to individual
     "filters" in the operator. See `operator_value_at_z()` for an example.
-    
+
     Air absorption is not accounted for. The air parameters are used only to
     compute the speed of sound.
     """
     if position.shape != (3,):
         raise ValueError('The position must be a 1D array of length 3.')
-    
+
     if output_file_path is None:
         print('\tNo output folder specified.\n\tComputing ray-tracing...')
         load_existing = False
@@ -92,10 +213,10 @@ def energy_contributions(mesh: TriangleMesh,
         print('\tOutput folder specified. File:\n\t\t', output_file_path)
         print('\tLoading existing ray-tracing results...')
         load_existing = True
-    
+
     # IMPORTANT: path_indexing is 1-indexed to benefit from sparsity.
     num_paths = path_indexing.max()
-    
+
     if load_existing:
         operator = csr_array(mmread(output_file_path, spmatrix=True))
     else:
@@ -109,54 +230,49 @@ def energy_contributions(mesh: TriangleMesh,
         front_patch_ids, back_patch_ids = ray_pencil.get_indices(copy=False)
         # We only care about the distance to the "front" hit.
         hit_distances, _ = ray_pencil.get_distances(copy=False)
-        
+
         # If any ray did not find a valid hit, its distance is NaN.
         valid_hits = np.isfinite(hit_distances)
-        
+
         # Convert the distances (in meters) to delays (in number of samples).
         c = sound_speed(humidity, temperature, pressure)
         hit_delays = np.zeros_like(hit_distances, dtype=int)
-        hit_delays[valid_hits] = (hit_distances[valid_hits]
-                                  * echogram_sample_rate
-                                  / c)
-        
+        hit_delays[valid_hits] = (hit_distances[valid_hits] * echogram_sample_rate / c)
+
         # Create sparse array for TD-ART "filters". The length in samples is
         #   based on the largest valid delay of any ray.
         # Note: this is constructed in LIL format for speed, then converted.
         operator = lil_array((num_paths, np.max(hit_delays[valid_hits]) + 1))
-        
+
         # Populate the array based on the path and delay of each (valid) ray.
         for ray_idx, ray_valid in enumerate(valid_hits):
             if not ray_valid:
                 continue
-            
-            ray_path_idx = path_indexing[front_patch_ids[ray_idx],
-                                         back_patch_ids[ray_idx]]
+
+            ray_path_idx = path_indexing[front_patch_ids[ray_idx], back_patch_ids[ray_idx]]
             # IMPORTANT: path_indexing is 1-indexed to benefit from sparsity.
             ray_path_idx -= 1
-            
+
             operator[ray_path_idx, hit_delays[ray_idx]] += 1
-        
+
         # Normalize all gathered amounts by the number of (valid) rays.
         operator /= np.count_nonzero(valid_hits)
         # Convert to CSR format for easier handling down the road.
         operator = csr_array(operator)
-        
+
         if output_file_path is not None:
             # Save sparse array to output_file_path (if provided).
-            mmwrite(output_file_path, operator,
-                    field='real', symmetry='general',
-                    comment='Ray-tracing results from ' +
-                            'position {}. '.format(np.round(position, 3)) +
-                            'Echogram bins use ' +
-                            'sample rate {:.0f}.'.format(echogram_sample_rate))
-    
+            mmwrite(output_file_path,
+                    operator,
+                    field='real',
+                    symmetry='general',
+                    comment='Ray-tracing results from ' + 'position {}. '.format(np.round(position, 3)) +
+                    'Echogram bins use ' + 'sample rate {:.0f}.'.format(echogram_sample_rate))
+
     return operator
 
 
-def operator_value_at_z(operator: csr_array,
-                        z: float, fs: float
-                        ) -> np.ndarray:
+def operator_value_at_z(operator: csr_array, z: float, fs: float) -> np.ndarray:
     """
     Given a sparse representation of an FIR filter, evaluate its Z-transform at
     a given value of z.
@@ -188,7 +304,7 @@ def operator_value_at_z(operator: csr_array,
     result: numpy.ndarray
         An array of shape (N,), where N is the first dimension of the input.
         The second dimension of the input, being time, is collapsed.
-    
+
     Notes
     -----
     Instead of expecting a z value which is normalized w.r.t. the sample rate,
@@ -197,44 +313,48 @@ def operator_value_at_z(operator: csr_array,
     """
     if len(operator.shape) != 2:
         raise ValueError('The operator must be a 2D array.')
-    
+
     num_paths = operator.shape[0]
     result = np.zeros(num_paths)
-    
+
     for path_idx in range(num_paths):
         # For an explanation of indptr, see the docs of csr_array or
         #   https://stackoverflow.com/a/52299730
         start = operator.indptr[path_idx]
-        end = operator.indptr[path_idx+1]
-        
+        end = operator.indptr[path_idx + 1]
+
         # These indices and values correspond to the time samples and
         #   energy amounts of individual contributions to path_idx.
         contrib_delays = operator.indices[start:end]
         contrib_amounts = operator.data[start:end]
-        
+
         # The delays need to be expressed in seconds.
         contrib_delays = contrib_delays / fs
-        
+
         # This is the crux of this function: computing the Z-transform of each
         #   filter at a specified value of z. This collapses the "time sample"
         #   dimension of the sparse array.
         # See "ART_theory.md" for details, specifically the end of section
         #   "ART injection and detection operators".
         for amount, delay in zip(contrib_amounts, contrib_delays):
-            result[path_idx] += amount * (z ** -delay)
-    
+            result[path_idx] += amount * (z**-delay)
+
     return result
 
 
 def run_ART(folder_path: str,
-            source_positions: np.ndarray, listener_positions: np.ndarray,
-            overwrite_sources: bool = False, overwrite_listeners: bool = False,
+            source_positions: np.ndarray,
+            listener_positions: np.ndarray,
+            overwrite_sources: bool = False,
+            overwrite_listeners: bool = False,
             echogram_sample_rate: float = 5e3,
             echogram_duration: float = 1.,
             num_rays: int = 1000,
             output_folder_path: str = None,
-            humidity: float = 50., temperature: float = 20., pressure: float = 100.
-            ) -> Tuple[np.ndarray, np.ndarray]:
+            operate_in_pressure_domain: bool = False,
+            humidity: float = 50.,
+            temperature: float = 20.,
+            pressure: float = 100.) -> Tuple[np.ndarray, np.ndarray]:
     """
     Build echograms using TD-ART.
 
@@ -264,6 +384,9 @@ def run_ART(folder_path: str,
     output_folder_path: str, default: None
         Path to the folder where ray-tracing results are saved (if provided).
         Specifying this is recommended to avoid repeated operations.
+    operate_in_pressure_domain: bool, default: False
+        If True, then the ART kernels will be paraunitary and the injection and detection
+        operators square rooted.
     humidity : float, default: 50.0
         Relative humidity (%) used for speed-of-sound computation.
     temperature : float, default: 20.0
@@ -281,7 +404,7 @@ def run_ART(folder_path: str,
         - T is the duration of the echograms in number of samples.
     frequencies: numpy.ndarray
         The center frequency of each band.
-    
+
     Notes
     -----
     Air absorption is not accounted for. The air parameters are used only to
@@ -291,7 +414,10 @@ def run_ART(folder_path: str,
         raise ValueError('Not a valid folder path:\n\t' + folder_path)
     if output_folder_path is not None and not os.path.isdir(output_folder_path):
         raise ValueError('Not a valid folder path:\n\t' + output_folder_path)
-    
+
+    if operate_in_pressure_domain:
+        print('Operating ART in pressure domain. Echogram sample rate must equal audio sample rate')
+
     # If only one source/listener position was provided,
     #   add a dimension (of size 1) for consistency.
     size_message = 'The source and listener position arguments must either have size (3) or (N, 3) where N is the number of positions.'
@@ -324,7 +450,7 @@ def run_ART(folder_path: str,
     # Load frequency band centers.
     frequencies = load_frequencies(folder_path)
     num_bands = len(frequencies)
-    
+
     # Read `path_lengths.csv` and `path_etendues.csv`.
     path_delays = np.loadtxt(os.path.join(folder_path, 'path_delays.csv'), delimiter=',')
     path_etendues = np.loadtxt(os.path.join(folder_path, 'path_etendues.csv'), delimiter=',')
@@ -334,11 +460,14 @@ def run_ART(folder_path: str,
     min_valid_rate = 1. / np.min(path_delays)
     min_recommended_rate = 10. / np.min(path_delays)
     if np.min(integer_delays) < 1:
-        raise ValueError('The echogram sample rate {:.0f} is too low for this environment. '.format(np.floor(echogram_sample_rate)) +
-                         'It needs to be at least {:.0f} in order for all integer delays to be at least 1 sample. '.format(np.ceil(min_valid_rate)) +
-                         'A value above {:.0f} is recommended. '.format(np.ceil(min_recommended_rate)))
+        raise ValueError(
+            'The echogram sample rate {:.0f} is too low for this environment. '.format(np.floor(echogram_sample_rate)) +
+            'It needs to be at least {:.0f} in order for all integer delays to be at least 1 sample. '.format(
+                np.ceil(min_valid_rate)) +
+            'A value above {:.0f} is recommended. '.format(np.ceil(min_recommended_rate)))
     elif np.min(integer_delays) < 10:
-        warnings.warn('The echogram sample rate {:.0f} is very low for this environment. '.format(np.floor(echogram_sample_rate)) +
+        warnings.warn('The echogram sample rate {:.0f} is very low for this environment. '.format(
+            np.floor(echogram_sample_rate)) +
                       'Consider increasing it to avoid excessive rounding of propagation delays. ' +
                       'A value above {:.0f} is recommended. '.format(np.ceil(min_recommended_rate)))
 
@@ -348,99 +477,106 @@ def run_ART(folder_path: str,
     path_indexing = csr_array(mmread(os.path.join(folder_path, 'path_indexing.mtx'), spmatrix=True))
     # IMPORTANT: path_indexing is 1-indexed to benefit from sparsity.
     num_paths = path_indexing.max()
-    
+
     # Evaluate the path "visibility" from each source position.
     injectors_list = list()
     for source_idx in range(num_sources):
-        print('Processing source', source_idx+1)
+        print('Processing source', source_idx + 1)
 
         if output_folder_path is not None:
-            file_name = 'S{}_operator_{:.0f}Hz.mtx'.format(source_idx+1, echogram_sample_rate)
+            file_name = 'S{}_operator_{:.0f}Hz.mtx'.format(source_idx + 1, echogram_sample_rate)
             operator_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
-        
+
         # The 2D array returned by this function is a distribution of energy
         #   over the propagation paths, over time. The entire array sums to 1;
         #   it specifies how the point source's unit-energy pulse at time 0
         #   gets distributed among the propagation paths.
-        injectors = energy_contributions(mesh, path_indexing,
+        injectors = energy_contributions(mesh,
+                                         path_indexing,
                                          source_positions[source_idx],
                                          overwrite_sources,
                                          echogram_sample_rate,
                                          num_rays,
                                          operator_file_path,
-                                         humidity, temperature, pressure)
-    
+                                         humidity,
+                                         temperature,
+                                         pressure)
+
         # Injectors need to be rescaled to convert units.
         # Refer to "ART_theory.md" for more info on this process.
-        injectors *= 4*np.pi
-        
+        injectors *= 4 * np.pi
+
         injectors_list.append(injectors)
 
     # Evaluate the path "visibility" from each listener position.
     detectors_list = list()
     for listener_idx in range(num_listeners):
-        print('Processing listener', listener_idx+1)
-        
+        print('Processing listener', listener_idx + 1)
+
         if output_folder_path is not None:
-            file_name = 'L{}_operator_{:.0f}Hz.mtx'.format(listener_idx+1, echogram_sample_rate)
+            file_name = 'L{}_operator_{:.0f}Hz.mtx'.format(listener_idx + 1, echogram_sample_rate)
             operator_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
-        
+
         # The 2D array returned by this function is a distribution of energy
         #   over the propagation paths, over time. The entire array sums to 1;
         #   it specifies how energy reaching the point listener from different
         #   paths gets delayed and weighted.
-        detectors = energy_contributions(mesh, path_indexing,
+        detectors = energy_contributions(mesh,
+                                         path_indexing,
                                          listener_positions[listener_idx],
                                          overwrite_listeners,
                                          echogram_sample_rate,
                                          num_rays,
                                          operator_file_path,
-                                         humidity, temperature, pressure)
-        
+                                         humidity,
+                                         temperature,
+                                         pressure)
+
         # Detectors need to be rescaled to convert units.
         # Refer to "ART_theory.md" for more info on this process.
-        detectors = csr_array(detectors.multiply(4*np.pi / path_etendues[:, None]))
-        
+        detectors = csr_array(detectors.multiply(4 * np.pi / path_etendues[:, None]))
+
         detectors_list.append(detectors)
-    
+
     print('All components ready. Assembling echograms.')
-    
+
     # Prepare the output array.
-    time_axis = np.arange(0., echogram_duration, 1/echogram_sample_rate)
+    time_axis = np.arange(0., echogram_duration, 1 / echogram_sample_rate)
     echograms = np.zeros((num_sources, num_listeners, num_bands, len(time_axis)))
-    
+
     # For each frequency band...
     for band_idx in range(num_bands):
         # ...load the corresponding kernel.
-        kernel = csr_array(mmread(os.path.join(folder_path, 'ART_kernel_band_{}.mtx'.format(band_idx+1)), spmatrix=True))
+        kernel = _load_art_kernel(folder_path, band_idx + 1, operate_in_pressure_domain)
 
-        print('\tFrequency band {}...'.format(band_idx+1))
-        
+        print('\tFrequency band {}...'.format(band_idx + 1))
+
         # For each source...
         for source_idx in range(num_sources):
             # ...select the appropriate injection operators.
             injectors = injectors_list[source_idx]
-            
+
             # Prepare an array to hold the radiance of each propagation path.
             # N.B.: This is the memory-intensive bottleneck of TD-ART.
             radiance_per_path = np.zeros((num_paths, len(time_axis)))
-            
+
             # Populate the radiance array with the initial radiance (0th order).
             for path_idx in range(num_paths):
                 # For an explanation of indptr, see the docs of csr_array or
                 #   https://stackoverflow.com/a/52299730
                 start = injectors.indptr[path_idx]
-                end = injectors.indptr[path_idx+1]
-                
+                end = injectors.indptr[path_idx + 1]
+
                 # These indices and values correspond to the time samples and
                 #   energy amounts of individual contributions to path_idx.
                 contrib_delays = injectors.indices[start:end]
-                contrib_amounts = injectors.data[start:end]
-                
+                contrib_amounts = np.sqrt(
+                    injectors.data[start:end]) if operate_in_pressure_domain else injectors.data[start:end]
+
                 for amount, delay in zip(contrib_amounts, contrib_delays):
                     if delay < len(time_axis):
                         radiance_per_path[path_idx, delay] += amount
@@ -448,11 +584,11 @@ def run_ART(folder_path: str,
             # `radiance_per_path` currently holds the energy contributions AT
             #   the surface patches, i.e., about to be reflected.
             # They need to be reflected once by applying the scattering matrix.
-            radiance_per_path = kernel @ radiance_per_path
+            radiance_per_path = _apply_kernel_to_signal(kernel, radiance_per_path)
 
             # Main recursive loop of TD-ART. Recursively propagate radiance for
             #   each time step.
-            for time_sample in range(len(time_axis)):
+            for time_sample in tqdm(range(len(time_axis))):
                 # Assemble a vector holding the output of each propagation path
                 #   at the current time step. This is the radiance currently
                 #   reaching each surface patch.
@@ -463,37 +599,38 @@ def run_ART(folder_path: str,
                 # Reflect the propagated radiance, turning it into the radiance
                 #   currently departing from each surface patch.
                 # Add it back onto the state array.
-                radiance_per_path[:, time_sample] += kernel @ state_vector
-            
+                _apply_kernel_to_sample(kernel, state_vector, radiance_per_path, time_sample)
+
             # The recursive propagation is done. Radiance can now be detected,
             #   separately, by each listener. For each listener...
             for listener_idx in range(num_listeners):
                 # ...select the appropriate detection operators.
                 detectors = detectors_list[listener_idx]
-                
+
                 # Detect the radiance gathered onto each propagation path,
                 #   scaling and delaying it as dictated by the detectors.
                 for path_idx in range(num_paths):
                     start = detectors.indptr[path_idx]
-                    end = detectors.indptr[path_idx+1]
+                    end = detectors.indptr[path_idx + 1]
                     contrib_delays = detectors.indices[start:end]
-                    contrib_amounts = detectors.data[start:end]
-                    
+                    contrib_amounts = np.sqrt(
+                        detectors.data[start:end]) if operate_in_pressure_domain else detectors.data[start:end]
+
                     for amount, delay in zip(contrib_amounts, contrib_delays):
                         if delay < len(time_axis):
-                            echograms[source_idx, listener_idx, band_idx, delay:] += amount * radiance_per_path[path_idx, :len(time_axis)-delay]
-    
+                            echograms[source_idx, listener_idx, band_idx,
+                                      delay:] += amount * radiance_per_path[path_idx, :len(time_axis) - delay]
+
     print('Adding line-of-sight components where unobstructed.')
-    
+
     # Cast rays from each listener to each source, to determine if the
     #   line-of-sight is obstructed.
     los_ray_origins = np.repeat(listener_positions, num_sources, axis=0)
     los_ray_targets = np.tile(source_positions, (num_listeners, 1))
     los_ray_directions = los_ray_targets - los_ray_origins
-    los_rays = RayBundle.from_origins_and_directions(los_ray_origins,
-                                                     los_ray_directions)
+    los_rays = RayBundle.from_origins_and_directions(los_ray_origins, los_ray_directions)
     los_rays.trace_all(mesh)
-    
+
     # Evaluate the propagation delays of unobstructed line-of-sight components.
     free_distances = np.linalg.norm(los_ray_directions, axis=-1)
     free_distances = free_distances.reshape(num_listeners, num_sources).T
@@ -501,7 +638,7 @@ def run_ART(folder_path: str,
     ray_distances = ray_distances.reshape(num_listeners, num_sources).T
     # The line-of-sight is unobstructed if the mesh hit is behind the listener.
     los_visibility = (ray_distances > free_distances)
-    
+
     c = sound_speed(humidity, temperature, pressure)
     los_delays = (free_distances * echogram_sample_rate / c).astype(int)
 
@@ -512,15 +649,16 @@ def run_ART(folder_path: str,
             #   there can be no energy earlier than the line-of-sight
             #   propagation delay. Use that fact to truncate any early excess.
             echograms[s, l, :, :los_delays[s, l]] = 0.
-            
+
             if los_visibility[s, l]:
                 # On top of the inverse-square-distance term, we need to
                 #   divide by a "4 pi" term, due to the units of measure being
                 #   used by convention (we assume a unit-power point source).
                 contribution = 1 / (4 * np.pi * free_distances[s, l]**2)
-                
-                echograms[s, l, :, los_delays[s, l]] += contribution
-    
+
+                echograms[s, l, :,
+                          los_delays[s, l]] += np.sqrt(contribution) if operate_in_pressure_domain else contribution
+
     # Up to this point, the echograms have used the histrogram-like convention
     #   "The value of each echogram sample is the amount of energy which falls
     #    in that time bin."
@@ -531,21 +669,24 @@ def run_ART(folder_path: str,
     #   words, we want the output to be a sampling of the continuous-time
     #   acoustic intensity response (square of the continuous-time RIR).
     echograms *= echogram_sample_rate
-    
+
     return echograms, frequencies
 
 
 # TODO: Take a T60 threshold (max slopes per band) as argument.
 def run_MoDART(folder_path: str,
-               source_positions: np.ndarray, listener_positions: np.ndarray,
-               overwrite_sources: bool = False, overwrite_listeners: bool = False,
+               source_positions: np.ndarray,
+               listener_positions: np.ndarray,
+               overwrite_sources: bool = False,
+               overwrite_listeners: bool = False,
                avoid_saving_residues: bool = True,
                echogram_sample_rate: float = 5e3,
                echogram_duration: float = 1.,
                num_rays: int = 1000,
                output_folder_path: str = None,
-               humidity: float = 50., temperature: float = 20., pressure: float = 100.
-               ) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
+               humidity: float = 50.,
+               temperature: float = 20.,
+               pressure: float = 100.) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
     """
     Build echograms using MoD-ART.
 
@@ -605,7 +746,7 @@ def run_MoDART(folder_path: str,
         - 'W_hat', shape (M, N): left eigenvector of each mode.
         - 'Source residues', shape (S, M): source residues components.
         - 'Listener residues', shape (L, M): Listener residues components.
-    
+
     Notes
     -----
     Air absorption is not accounted for. The air parameters are used only to
@@ -615,7 +756,7 @@ def run_MoDART(folder_path: str,
         raise ValueError('Not a valid folder path:\n\t' + folder_path)
     if output_folder_path is not None and not os.path.isdir(output_folder_path):
         raise ValueError('Not a valid folder path:\n\t' + output_folder_path)
-    
+
     # If only one source/listener position was provided,
     #   add a dimension (of size 1) for consistency.
     size_message = 'The source and listener position arguments must either have size (3) or (N, 3) where N is the number of positions.'
@@ -648,182 +789,179 @@ def run_MoDART(folder_path: str,
     # Load frequency band centers.
     frequencies = load_frequencies(folder_path)
     num_bands = len(frequencies)
-    
+
     print('Running `run_MoDART` in the environment "' + os.path.split(folder_path)[-1] + '"')
 
     # Load propagation path indexing (relates patch indices to path indices).
     path_indexing = csr_array(mmread(os.path.join(folder_path, 'path_indexing.mtx'), spmatrix=True))
     # IMPORTANT: path_indexing is 1-indexed to benefit from sparsity.
     num_paths = path_indexing.max()
-    
+
     # Load MoD-ART data (band index, T60, and eigenvectors of each mode).
     mode_band_idxs = np.zeros(0, dtype=int)
     mode_T60s = np.zeros(0)
     mode_V_hats = np.zeros((0, num_paths))
     mode_W_hats = np.zeros((0, num_paths))
-    
+
     with open(os.path.join(folder_path, 'MoD-ART.csv'), 'r') as file:
         file_iterator = iter(file)
         for line1 in file_iterator:
             line2 = next(file_iterator)
             line3 = next(file_iterator)
-    
+
             band_idx, mode_t60 = line1.split(',')
             band_idx = int(band_idx.strip())
             mode_t60 = float(mode_t60.strip())
-    
+
             V_hat = np.fromstring(line2, sep=',')
             W_hat = np.fromstring(line3, sep=',')
-            
+
             mode_band_idxs = np.append(mode_band_idxs, band_idx)
             mode_T60s = np.append(mode_T60s, mode_t60)
             mode_V_hats = np.append(mode_V_hats, V_hat[None], axis=0)
             mode_W_hats = np.append(mode_W_hats, W_hat[None], axis=0)
-    
+
     # IMPORTANT: mode_band_idxs is 1-indexed in the file.
     # Change it for intuitiveness.
     mode_band_idxs -= 1
-    
-    MoDART_data = {'Band idx': mode_band_idxs,
-                   'T60': mode_T60s,
-                   'V_hat': mode_V_hats,
-                   'W_hat': mode_W_hats}
-    
+
+    MoDART_data = {
+        'Band idx': mode_band_idxs,
+        'T60': mode_T60s,
+        'V_hat': mode_V_hats,
+        'W_hat': mode_W_hats
+    }
+
     num_modes = len(mode_T60s)
-    
+
     # Convert the T60 values to "energy decay per second", as needed later.
-    mode_decays = 10 ** (-6 / mode_T60s)
-    
+    mode_decays = 10**(-6 / mode_T60s)
+
     # Create residue arrays of the required shapes.
     source_residues = np.zeros((num_sources, num_modes))
     listener_residues = np.zeros((num_listeners, num_modes))
 
     # Evaluate the source residue components at each position, for each mode.
     for source_idx in range(num_sources):
-        print('Processing source', source_idx+1)
+        print('Processing source', source_idx + 1)
 
         if output_folder_path is not None:
-            file_name = 'S{}_operator_{:.0f}Hz.mtx'.format(source_idx+1, echogram_sample_rate)
+            file_name = 'S{}_operator_{:.0f}Hz.mtx'.format(source_idx + 1, echogram_sample_rate)
             operator_file_path = os.path.join(output_folder_path, file_name)
-            file_name = 'S{}_residue_{:.0f}Hz.mtx'.format(source_idx+1, echogram_sample_rate)
+            file_name = 'S{}_residue_{:.0f}Hz.mtx'.format(source_idx + 1, echogram_sample_rate)
             residue_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
             residue_file_path = None
-        
+
         if avoid_saving_residues:
             residue_file_path = None
-        
+
         # The 2D array returned by this function is a distribution of energy
         #   over the propagation paths, over time. The entire array sums to 1;
         #   it specifies how the point source's unit-energy pulse at time 0
         #   gets distributed among the propagation paths.
-        injectors = energy_contributions(mesh, path_indexing,
+        injectors = energy_contributions(mesh,
+                                         path_indexing,
                                          source_positions[source_idx],
                                          overwrite_sources,
                                          echogram_sample_rate,
                                          num_rays,
                                          operator_file_path,
-                                         humidity, temperature, pressure)
-        
+                                         humidity,
+                                         temperature,
+                                         pressure)
+
         # If a path is provided and data already exists, load the residues.
         # Otherwise, compute them and save the results.
-        if (residue_file_path is None
-                or not os.path.isfile(residue_file_path)
-                or overwrite_sources):
+        if (residue_file_path is None or not os.path.isfile(residue_file_path) or overwrite_sources):
             print('\tComputing residues...')
             for mode_idx in range(num_modes):
                 # For the residues, we need to compute the Z-transform of each
                 #   filter setting z at the pole value. See "ART_theory.md" for
                 #   details, specifically the end of section
                 #   "ART injection and detection operators".
-                contributions = operator_value_at_z(injectors,
-                                                    mode_decays[mode_idx],
-                                                    echogram_sample_rate)
-                
+                contributions = operator_value_at_z(injectors, mode_decays[mode_idx], echogram_sample_rate)
+
                 # The processed energy contributions are combined with the
                 #   LEFT eigenvector, which already includes the appropriate
                 #   normalization terms. Again, see "ART_theory.md".
-                source_residues[source_idx, mode_idx] = np.dot(mode_W_hats[mode_idx],
-                                                               contributions)
-            
+                source_residues[source_idx, mode_idx] = np.dot(mode_W_hats[mode_idx], contributions)
+
             if residue_file_path is not None:
                 np.savetxt(residue_file_path, source_residues, fmt='%.18f', delimiter=', ')
         else:
             print('\tLoading existing residues... File:\n\t\t', residue_file_path)
             source_residues = np.loadtxt(residue_file_path, delimiter=',')
-        
+
     # Evaluate the listener residue components at each position, for each mode.
     for listener_idx in range(num_listeners):
-        print('Processing listener', listener_idx+1)
-        
+        print('Processing listener', listener_idx + 1)
+
         if output_folder_path is not None:
-            file_name = 'L{}_operator_{:.0f}Hz.mtx'.format(listener_idx+1, echogram_sample_rate)
+            file_name = 'L{}_operator_{:.0f}Hz.mtx'.format(listener_idx + 1, echogram_sample_rate)
             operator_file_path = os.path.join(output_folder_path, file_name)
-            file_name = 'L{}_residue_{:.0f}Hz.mtx'.format(listener_idx+1, echogram_sample_rate)
+            file_name = 'L{}_residue_{:.0f}Hz.mtx'.format(listener_idx + 1, echogram_sample_rate)
             residue_file_path = os.path.join(output_folder_path, file_name)
         else:
             operator_file_path = None
             residue_file_path = None
-        
+
         if avoid_saving_residues:
             residue_file_path = None
-        
+
         # The 2D array returned by this function is a distribution of energy
         #   over the propagation paths, over time. The entire array sums to 1;
         #   it specifies how energy reaching the point listener from different
         #   paths gets delayed and weighted.
-        detectors = energy_contributions(mesh, path_indexing,
+        detectors = energy_contributions(mesh,
+                                         path_indexing,
                                          listener_positions[listener_idx],
                                          overwrite_listeners,
                                          echogram_sample_rate,
                                          num_rays,
                                          operator_file_path,
-                                         humidity, temperature, pressure)
-        
+                                         humidity,
+                                         temperature,
+                                         pressure)
+
         # If a path is provided and data already exists, load the residues.
         # Otherwise, compute them and save the results.
-        if (residue_file_path is None
-                or not os.path.isfile(residue_file_path)
-                or overwrite_listeners):
+        if (residue_file_path is None or not os.path.isfile(residue_file_path) or overwrite_listeners):
             print('\tComputing residues...')
             for mode_idx in range(num_modes):
                 # For the residues, we need to compute the Z-transform of each
                 #   filter setting z at the pole value. See "ART_theory.md" for
                 #   details, specifically the end of section
                 #   "ART injection and detection operators".
-                contributions = operator_value_at_z(detectors,
-                                                    mode_decays[mode_idx],
-                                                    echogram_sample_rate)
-                
+                contributions = operator_value_at_z(detectors, mode_decays[mode_idx], echogram_sample_rate)
+
                 # The processed energy contributions are combined with the
                 #   RIGHT eigenvector, which already includes the appropriate
                 #   normalization terms. Again, see "ART_theory.md".
-                listener_residues[listener_idx, mode_idx] = np.dot(mode_V_hats[mode_idx],
-                                                                   contributions)
-            
+                listener_residues[listener_idx, mode_idx] = np.dot(mode_V_hats[mode_idx], contributions)
+
             if residue_file_path is not None:
                 np.savetxt(residue_file_path, listener_residues, fmt='%.18f', delimiter=', ')
         else:
             print('\tLoading existing residues... File:\n\t\t', residue_file_path)
             listener_residues = np.loadtxt(residue_file_path, delimiter=',')
-    
+
     # Add the residues to the returned modal data.
     MoDART_data['Source residues'] = source_residues
     MoDART_data['Listener residues'] = listener_residues
-    
-    print('All residues ready. Assembling echograms.')
-    
-    # Construct echograms as sums of weighted slope terms.
-    time_axis = np.arange(0., echogram_duration, 1/echogram_sample_rate)
-    echograms = np.zeros((num_sources, num_listeners, num_bands, len(time_axis)))
-    
-    for mode_idx in range(num_modes):
-        slope = mode_decays[mode_idx] ** time_axis
 
-        residue_matrix = np.outer(listener_residues[:, mode_idx],
-                                  source_residues[:, mode_idx]).T
-        
+    print('All residues ready. Assembling echograms.')
+
+    # Construct echograms as sums of weighted slope terms.
+    time_axis = np.arange(0., echogram_duration, 1 / echogram_sample_rate)
+    echograms = np.zeros((num_sources, num_listeners, num_bands, len(time_axis)))
+
+    for mode_idx in range(num_modes):
+        slope = mode_decays[mode_idx]**time_axis
+
+        residue_matrix = np.outer(listener_residues[:, mode_idx], source_residues[:, mode_idx]).T
+
         slope = residue_matrix[:, :, None] * slope[None, None]
 
         echograms[:, :, mode_band_idxs[mode_idx], :] += slope
@@ -832,16 +970,15 @@ def run_MoDART(folder_path: str,
     echograms = np.clip(echograms, 0, None)
 
     print('Adding line-of-sight components where unobstructed.')
-    
+
     # Cast rays from each listener to each source, to determine if the
     #   line-of-sight is obstructed.
     los_ray_origins = np.repeat(listener_positions, num_sources, axis=0)
     los_ray_targets = np.tile(source_positions, (num_listeners, 1))
     los_ray_directions = los_ray_targets - los_ray_origins
-    los_rays = RayBundle.from_origins_and_directions(los_ray_origins,
-                                                     los_ray_directions)
+    los_rays = RayBundle.from_origins_and_directions(los_ray_origins, los_ray_directions)
     los_rays.trace_all(mesh)
-    
+
     # Evaluate the propagation delays of unobstructed line-of-sight components.
     free_distances = np.linalg.norm(los_ray_directions, axis=-1)
     free_distances = free_distances.reshape(num_listeners, num_sources).T
@@ -849,7 +986,7 @@ def run_MoDART(folder_path: str,
     ray_distances = ray_distances.reshape(num_listeners, num_sources).T
     # The line-of-sight is unobstructed if the mesh hit is behind the listener.
     los_visibility = (ray_distances > free_distances)
-    
+
     c = sound_speed(humidity, temperature, pressure)
     los_delays = (free_distances * echogram_sample_rate / c).astype(int)
 
@@ -860,20 +997,19 @@ def run_MoDART(folder_path: str,
             #   there can be no energy earlier than the line-of-sight
             #   propagation delay. Use that fact to truncate any early excess.
             echograms[s, l, :, :los_delays[s, l]] = 0.
-            
+
             if los_visibility[s, l]:
                 # On top of the inverse-square-distance term, we need to
                 #   divide by a "4 pi" term, due to the units of measure being
                 #   used by convention (we assume a unit-power point source).
                 contribution = 1 / (4 * np.pi * free_distances[s, l]**2)
-                
+
                 # In order to match the rest of the echogram, we need to use a
                 #   sample-rate-agnostic "energy per second" convention for
                 #   these values. As such, they need to be adjusted (see notes
                 #   in `run_ART()`.
                 contribution *= echogram_sample_rate
-                
+
                 echograms[s, l, :, los_delays[s, l]] += contribution
-    
+
     return echograms, frequencies, MoDART_data
-    
