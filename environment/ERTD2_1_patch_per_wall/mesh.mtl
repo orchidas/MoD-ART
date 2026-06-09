@@ -1,0 +1,47 @@
+newmtl Patch_1_Mat_HallwayFloor
+Kd 0.40 0.40 0.40
+
+newmtl Patch_2_Mat_HallwayCeiling
+Kd 0.55 0.55 0.55
+
+newmtl Patch_3_Mat_HallwayLeftWall
+Kd 0.72 0.72 0.72
+
+newmtl Patch_4_Mat_HallwayBackWall
+Kd 0.70 0.62 0.48
+
+newmtl Patch_5_Mat_HallwayFrontWall
+Kd 0.72 0.72 0.72
+
+newmtl Patch_6_Mat_MeetingFloor
+Kd 0.40 0.40 0.40
+
+newmtl Patch_7_Mat_MeetingCeiling
+Kd 0.55 0.55 0.55
+
+newmtl Patch_8_Mat_MeetingRightWall
+Kd 0.72 0.72 0.72
+
+newmtl Patch_9_Mat_MeetingBackWall
+Kd 0.70 0.62 0.48
+
+newmtl Patch_10_Mat_MeetingFrontWall
+Kd 0.72 0.72 0.72
+
+newmtl Patch_11_Mat_HallwayRightWall
+Kd 0.82 0.52 0.28
+
+newmtl Patch_12_Mat_HallwayRightWall
+Kd 0.82 0.52 0.28
+
+newmtl Patch_13_Mat_HallwayRightWall
+Kd 0.82 0.52 0.28
+
+newmtl Patch_14_Mat_HallwayRightWall
+Kd 0.82 0.52 0.28
+
+newmtl Patch_15_Mat_MeetingLeftWall
+Kd 0.28 0.62 0.82
+
+newmtl Patch_16_Mat_MeetingLeftWall
+Kd 0.28 0.62 0.82

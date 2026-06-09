@@ -1,0 +1,36 @@
+Frequencies
+HallwayFloor, 0.042
+HallwayFloor, 0.01
+
+HallwayCeiling, 0.042
+HallwayCeiling, 0.01
+
+HallwayLeftWall, 0.042
+HallwayLeftWall, 0.01
+
+HallwayBackWall, 0.042
+HallwayBackWall, 0.01
+
+HallwayFrontWall, 0.042
+HallwayFrontWall, 0.01
+
+HallwayRightWall, 0.48
+HallwayRightWall, 0.01
+
+MeetingFloor, 0.12
+MeetingFloor, 0.01
+
+MeetingCeiling, 0.12
+MeetingCeiling, 0.01
+
+MeetingRightWall, 0.12
+MeetingRightWall, 0.01
+
+MeetingBackWall, 0.12
+MeetingBackWall, 0.01
+
+MeetingFrontWall, 0.12
+MeetingFrontWall, 0.01
+
+MeetingLeftWall, 0.12
+MeetingLeftWall, 0.01

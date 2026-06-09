@@ -1,0 +1,77 @@
+2026-06-05 11:45:51.220 | INFO     | SDNPy.utils.ARTMatrixMath:_prepare_pu_block_initializations:1601 - Preparing local PU initializations
+2026-06-05 11:49:10.264 | INFO     | __main__:save_feedback_matrix:123 - Saved feedback FIR to: /Users/k2478454/Documents/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_reflection_matrix/ART_kernel_band_1.npz
+2026-06-05 11:49:10.265 | INFO     | __main__:save_feedback_matrix:124 - Saved average-energy kernel to: /Users/k2478454/Documents/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_reflection_matrix/ART_kernel_band_1.mtx
+2026-06-05 11:49:10.265 | INFO     | __main__:save_feedback_matrix:125 - Final PU FIR shape: (134, 134, 17)
+2026-06-05 11:49:10.288 | INFO     | __main__:save_io_gains_and_delays:193 - Saved pressure input gains to: /Users/k2478454/Documents/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_reflection_matrix/pressure_input_gains_band_1.csv
+2026-06-05 11:49:10.288 | INFO     | __main__:save_io_gains_and_delays:194 - Saved ART source operator
+2026-06-05 11:49:10.289 | INFO     | __main__:save_io_gains_and_delays:195 - Saved pressure output gains to: /Users/k2478454/Documents/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_reflection_matrix/pressure_output_gains_band_1.csv
+2026-06-05 11:49:10.289 | INFO     | __main__:save_io_gains_and_delays:196 - Saved ART listener operator
+2026-06-05 11:49:10.289 | INFO     | __main__:main:302 - Reference pole decay: [2584.409  713.222  512.793  257.505]ms
+2026-06-05 11:49:10.290 | INFO     | __main__:main:305 - Candidate pole decay: [3197.921  594.584  321.337  263.608]ms
+2026-06-05 11:49:10.290 | INFO     | __main__:main:308 - Pole mismatch (log): 0.000001
+2026-06-05 11:49:10.290 | DEBUG    | __main__:main:316 - Source 1, listener 1
+2026-06-05 11:49:10.290 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1346.016321
+2026-06-05 11:49:10.290 | INFO     | __main__:main:320 - Reference residue: [ 6.9285  0.2692 53.1419 33.9028] dB
+2026-06-05 11:49:10.290 | INFO     | __main__:main:323 - Candidate residue: [30.1846 19.0259  7.0003 14.7013] dB
+2026-06-05 11:49:10.291 | DEBUG    | __main__:main:316 - Source 1, listener 2
+2026-06-05 11:49:10.291 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1151.334696
+2026-06-05 11:49:10.291 | INFO     | __main__:main:320 - Reference residue: [ 6.0803 31.5003 33.3385 46.161 ] dB
+2026-06-05 11:49:10.291 | INFO     | __main__:main:323 - Candidate residue: [24.5199  7.4329 10.6701  1.1219] dB
+2026-06-05 11:49:10.291 | DEBUG    | __main__:main:316 - Source 1, listener 3
+2026-06-05 11:49:10.291 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1155.238335
+2026-06-05 11:49:10.292 | INFO     | __main__:main:320 - Reference residue: [ 5.5312 11.9417 30.8911 57.5296] dB
+2026-06-05 11:49:10.293 | INFO     | __main__:main:323 - Candidate residue: [20.0312  1.4813 10.7653  4.3209] dB
+2026-06-05 11:49:10.293 | DEBUG    | __main__:main:316 - Source 1, listener 4
+2026-06-05 11:49:10.293 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1093.206827
+2026-06-05 11:49:10.293 | INFO     | __main__:main:320 - Reference residue: [ 6.4134  0.1522 48.9896 67.7268] dB
+2026-06-05 11:49:10.293 | INFO     | __main__:main:323 - Candidate residue: [16.7988  6.6089 13.1931 13.5247] dB
+2026-06-05 11:49:10.293 | DEBUG    | __main__:main:316 - Source 1, listener 5
+2026-06-05 11:49:10.293 | INFO     | __main__:main:317 - Residue mismatch (log mag): 514.998789
+2026-06-05 11:49:10.294 | INFO     | __main__:main:320 - Reference residue: [ 7.5949  3.704  28.0199 58.7563] dB
+2026-06-05 11:49:10.294 | INFO     | __main__:main:323 - Candidate residue: [14.494   0.2966 15.6391 15.7737] dB
+2026-06-05 11:49:10.294 | DEBUG    | __main__:main:316 - Source 1, listener 6
+2026-06-05 11:49:10.294 | INFO     | __main__:main:317 - Residue mismatch (log mag): 465.472232
+2026-06-05 11:49:10.295 | INFO     | __main__:main:320 - Reference residue: [ 8.9425  7.1156 21.3526 52.9705] dB
+2026-06-05 11:49:10.295 | INFO     | __main__:main:323 - Candidate residue: [11.7063  5.0756 17.8814 10.0981] dB
+2026-06-05 11:49:10.295 | DEBUG    | __main__:main:316 - Source 1, listener 7
+2026-06-05 11:49:10.295 | INFO     | __main__:main:317 - Residue mismatch (log mag): 878.203826
+2026-06-05 11:49:10.296 | INFO     | __main__:main:320 - Reference residue: [ 4.7808 35.8053 27.6227 29.1487] dB
+2026-06-05 11:49:10.296 | INFO     | __main__:main:323 - Candidate residue: [17.44    9.114  16.4551 17.5622] dB
+2026-06-05 11:49:10.296 | DEBUG    | __main__:main:316 - Source 1, listener 8
+2026-06-05 11:49:10.296 | INFO     | __main__:main:317 - Residue mismatch (log mag): 707.503521
+2026-06-05 11:49:10.296 | INFO     | __main__:main:320 - Reference residue: [ 5.0652 33.9469 31.3541 41.1959] dB
+2026-06-05 11:49:10.297 | INFO     | __main__:main:323 - Candidate residue: [14.7841 14.4091 11.841   0.2871] dB
+2026-06-05 11:49:10.297 | DEBUG    | __main__:main:316 - Source 1, listener 9
+2026-06-05 11:49:10.297 | INFO     | __main__:main:317 - Residue mismatch (log mag): 854.348442
+2026-06-05 11:49:10.297 | INFO     | __main__:main:320 - Reference residue: [ 6.2624 32.632  32.1957 42.7887] dB
+2026-06-05 11:49:10.297 | INFO     | __main__:main:323 - Candidate residue: [15.8643 13.2961 15.2032  4.8052] dB
+2026-06-05 11:49:10.298 | DEBUG    | __main__:main:316 - Source 1, listener 10
+2026-06-05 11:49:10.298 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1584.522801
+2026-06-05 11:49:10.298 | INFO     | __main__:main:320 - Reference residue: [ 7.0786 31.3831 33.1667 65.5077] dB
+2026-06-05 11:49:10.298 | INFO     | __main__:main:323 - Candidate residue: [17.1501 12.7002 19.0591  6.6241] dB
+2026-06-05 11:49:10.298 | DEBUG    | __main__:main:316 - Source 1, listener 11
+2026-06-05 11:49:10.298 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1258.140144
+2026-06-05 11:49:10.298 | INFO     | __main__:main:320 - Reference residue: [ 7.7953 30.3231 33.9453 52.9548] dB
+2026-06-05 11:49:10.298 | INFO     | __main__:main:323 - Candidate residue: [18.4915 13.0664 21.1638  9.3381] dB
+2026-06-05 11:49:10.299 | DEBUG    | __main__:main:316 - Source 1, listener 12
+2026-06-05 11:49:10.299 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1321.806349
+2026-06-05 11:49:10.300 | INFO     | __main__:main:320 - Reference residue: [ 7.7306 29.9685 34.6196 57.7129] dB
+2026-06-05 11:49:10.300 | INFO     | __main__:main:323 - Candidate residue: [21.104  16.3913 16.5023  5.0821] dB
+2026-06-05 11:49:10.300 | DEBUG    | __main__:main:316 - Source 1, listener 13
+2026-06-05 11:49:10.300 | INFO     | __main__:main:317 - Residue mismatch (log mag): 851.902937
+2026-06-05 11:49:10.301 | INFO     | __main__:main:320 - Reference residue: [ 6.7472 30.6843 34.6209 43.5967] dB
+2026-06-05 11:49:10.301 | INFO     | __main__:main:323 - Candidate residue: [24.9678 21.6349  8.7364  2.978 ] dB
+2026-06-05 11:49:10.301 | DEBUG    | __main__:main:316 - Source 1, listener 14
+2026-06-05 11:49:10.302 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1345.608699
+2026-06-05 11:49:10.302 | INFO     | __main__:main:320 - Reference residue: [ 4.535  31.2948 36.895  33.7803] dB
+2026-06-05 11:49:10.302 | INFO     | __main__:main:323 - Candidate residue: [30.3067 27.3886  2.5073 20.724 ] dB
+2026-06-05 11:49:10.302 | DEBUG    | __main__:main:316 - Source 1, listener 15
+2026-06-05 11:49:10.302 | INFO     | __main__:main:317 - Residue mismatch (log mag): 1712.376980
+2026-06-05 11:49:10.302 | INFO     | __main__:main:320 - Reference residue: [ 0.6372 30.4319 52.8726 30.2956] dB
+2026-06-05 11:49:10.307 | INFO     | __main__:main:323 - Candidate residue: [36.7198 31.242   4.0064 25.0705] dB
+2026-06-05 11:49:10.307 | DEBUG    | __main__:main:316 - Source 1, listener 16
+2026-06-05 11:49:10.307 | INFO     | __main__:main:317 - Residue mismatch (log mag): 871.373165
+2026-06-05 11:49:10.307 | INFO     | __main__:main:320 - Reference residue: [ 7.0891 12.5144 30.1154 28.3517] dB
+2026-06-05 11:49:10.308 | INFO     | __main__:main:323 - Candidate residue: [34.4962 25.1332  7.0269 16.8371] dB
+2026-06-05 11:49:10.308 | INFO     | __main__:main:341 - EDC mismatch: 14.524270 dB
+2026-06-05 11:49:10.308 | INFO     | __main__:main:347 - Best loss: 8.781269

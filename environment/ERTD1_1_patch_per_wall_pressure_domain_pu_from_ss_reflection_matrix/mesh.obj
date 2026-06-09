@@ -1,0 +1,112 @@
+mtllib mesh.mtl
+
+################################ Vertices
+
+v 0.0 0.0 0.0                  # 1
+v 0.0 0.0 2.8                  # 2
+v 0.0 18.0 0.0                 # 3
+v 0.0 18.0 2.8                 # 4
+v 4.5 0.0 0.0                  # 5
+v 4.5 0.0 2.8                  # 6
+v 4.5 18.0 0.0                 # 7
+v 4.5 18.0 2.8                 # 8
+v 4.5 7.0 0.0                  # 9
+v 4.5 7.0 2.8                  # 10
+v 4.5 13.6 0.0                 # 11
+v 4.5 13.6 2.8                 # 12
+v 9.1 7.0 0.0                  # 13
+v 9.1 7.0 2.8                  # 14
+v 9.1 13.6 0.0                 # 15
+v 9.1 13.6 2.8                 # 16
+v 4.5 9.5 0.0                  # 17
+v 4.5 9.5 2.0                  # 18
+v 4.5 9.5 2.8                  # 19
+v 4.5 10.5 0.0                 # 20
+v 4.5 10.5 2.0                 # 21
+v 4.5 10.5 2.8                 # 22
+
+################################ Faces
+
+# Room 1 floor
+usemtl Patch_1_Mat_HallwayWall
+f 3 1 5
+f 3 5 7
+
+# Room 1 ceiling
+usemtl Patch_2_Mat_HallwayWall
+f 2 4 6
+f 6 4 8
+
+# Room 1 west wall (x=0)
+usemtl Patch_3_Mat_HallwayWall
+f 4 2 1
+f 3 4 1
+
+# Room 1 south wall (y=0)
+usemtl Patch_4_Mat_HallwayWall
+f 2 6 5
+f 1 2 5
+
+# Room 1 north wall (y=18)
+usemtl Patch_5_Mat_HallwayWall
+f 3 8 4
+f 3 7 8
+
+# Room 2 floor
+usemtl Patch_6_Mat_MeetingRoomWall
+f 11 9 13
+f 11 13 15
+
+# Room 2 ceiling
+usemtl Patch_7_Mat_MeetingRoomWall
+f 10 12 14
+f 14 12 16
+
+# Room 2 east wall (x=9.1)
+usemtl Patch_8_Mat_MeetingRoomWall
+f 13 14 16
+f 13 16 15
+
+# Room 2 south wall (y=7)
+usemtl Patch_9_Mat_MeetingRoomWall
+f 10 14 13
+f 9 10 13
+
+# Room 2 north wall (y=13.6)
+usemtl Patch_10_Mat_MeetingRoomWall
+f 11 16 12
+f 11 15 16
+
+# Room 1 east wall (x=4.5), front segment (y=0..7)
+usemtl Patch_11_Mat_HallwayWall
+f 5 6 10
+f 5 10 9
+
+# Room 1 common wall (x=4.5), south part of aperture region (y=7..9.5)
+usemtl Patch_12_Mat_HallwayWall
+f 9 10 19
+f 9 19 17
+
+# Room 1 common wall (x=4.5), north/lintel part of aperture region (y=10.5..13.6 plus lintel)
+usemtl Patch_13_Mat_HallwayWall
+f 20 12 11
+f 20 21 12
+f 21 19 12
+f 21 18 19
+
+# Room 1 east wall (x=4.5), back segment (y=13.6..18)
+usemtl Patch_14_Mat_HallwayWall
+f 11 12 8
+f 11 8 7
+
+# Room 2 common wall (x=4.5), south part of aperture region
+usemtl Patch_15_Mat_MeetingRoomWall
+f 19 10 9
+f 17 19 9
+
+# Room 2 common wall (x=4.5), north/lintel part of aperture region
+usemtl Patch_16_Mat_MeetingRoomWall
+f 20 11 12
+f 20 12 21
+f 21 12 19
+f 21 19 18

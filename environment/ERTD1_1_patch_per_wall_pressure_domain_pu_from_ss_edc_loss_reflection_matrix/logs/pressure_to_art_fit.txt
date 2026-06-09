@@ -1,0 +1,155 @@
+2026-06-01 19:34:43.926 | INFO     | __main__:main:216 - Loaded fixed source and receiver gains from /Users/orchisamadas/Library/CloudStorage/OneDrive-King'sCollegeLondon/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall/rt_output
+2026-06-01 19:34:44.115 | INFO     | SDNPy.utils.ARTMatrixMath:_prepare_pu_block_initializations:1485 - Preparing local PU initializations
+2026-06-01 19:37:45.371 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=1
+2026-06-01 19:37:45.474 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=2
+2026-06-01 19:37:47.489 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=22
+2026-06-01 19:37:47.996 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=27
+2026-06-01 19:38:14.756 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=287
+2026-06-01 19:39:13.269 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.055782,  local=0.549139, edc=0.055782, eval=867
+2026-06-01 19:45:00.500 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4291
+2026-06-01 19:45:00.704 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4293
+2026-06-01 19:45:01.407 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4300
+2026-06-01 19:45:02.926 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4315
+2026-06-01 19:45:05.942 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4345
+2026-06-01 19:45:11.296 | INFO     | SDNPy.utils.ARTMatrixMath:objective:1692 - Feedback fit improved: total=0.038079,  local=0.549204, edc=0.038079, eval=4398
+2026-06-01 19:48:36.389 | INFO     | SDNPy.utils.ARTMatrixMath:callback:1437 - callback triggered
+2026-06-01 19:48:38.074 | INFO     | __main__:save_feedback_matrix:107 - Saved feedback FIR to: /Users/orchisamadas/Library/CloudStorage/OneDrive-King'sCollegeLondon/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_edc_loss_reflection_matrix/ART_kernel_band_1.npz
+2026-06-01 19:48:38.074 | INFO     | __main__:save_feedback_matrix:108 - Saved average-energy kernel to: /Users/orchisamadas/Library/CloudStorage/OneDrive-King'sCollegeLondon/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_edc_loss_reflection_matrix/ART_kernel_band_1.mtx
+2026-06-01 19:48:38.074 | INFO     | __main__:save_feedback_matrix:109 - Final PU FIR shape: (134, 134, 17)
+2026-06-01 19:48:38.088 | INFO     | __main__:save_io_gains_and_delays:166 - Saved pressure input gains to: /Users/orchisamadas/Library/CloudStorage/OneDrive-King'sCollegeLondon/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_edc_loss_reflection_matrix/pressure_input_gains_band_1.csv
+2026-06-01 19:48:38.088 | INFO     | __main__:save_io_gains_and_delays:167 - Saved ART source operator
+2026-06-01 19:48:38.088 | INFO     | __main__:save_io_gains_and_delays:168 - Saved pressure output gains to: /Users/orchisamadas/Library/CloudStorage/OneDrive-King'sCollegeLondon/SDN/GenSDN/GeneralSDN/submodules/MoD-ART/environment/ERTD_1_patch_per_wall_pressure_domain_pu_from_ss_edc_loss_reflection_matrix/pressure_output_gains_band_1.csv
+2026-06-01 19:48:38.088 | INFO     | __main__:save_io_gains_and_delays:169 - Saved ART listener operator
+2026-06-01 19:48:38.088 | INFO     | __main__:main:261 - Reference pole decay: [2584.409  713.222  512.793  257.505]ms
+2026-06-01 19:48:38.088 | INFO     | __main__:main:264 - Candidate pole decay: [3197.657  597.135  319.754  263.149]ms
+2026-06-01 19:48:38.088 | INFO     | __main__:main:267 - Pole mismatch (log): 0.000001
+2026-06-01 19:48:38.088 | DEBUG    | __main__:main:275 - Source 1, listener 1
+2026-06-01 19:48:38.088 | INFO     | __main__:main:276 - Residue mismatch (log mag): 20.687938
+2026-06-01 19:48:38.089 | INFO     | __main__:main:277 - Reference residue: [0.7977 0.031  6.1182 3.9032]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:280 - Candidate residue: [3.476  2.1584 0.183  2.0823]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:291 - Reference listener residue [ 0.8901  0.0631 -0.0127  0.0486]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:294 - Candidate listener residue [4.8286 1.5125 1.861  1.2091]
+2026-06-01 19:48:38.089 | DEBUG    | __main__:main:275 - Source 1, listener 2
+2026-06-01 19:48:38.089 | INFO     | __main__:main:276 - Residue mismatch (log mag): 18.084814
+2026-06-01 19:48:38.089 | INFO     | __main__:main:277 - Reference residue: [0.7    3.6266 3.8382 5.3145]
+2026-06-01 19:48:38.089 | INFO     | __main__:main:280 - Candidate residue: [2.8242 0.7629 0.6571 0.8855]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:291 - Reference listener residue [ 0.8073 -0.0016 -0.1237  0.0119]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:294 - Candidate listener residue [2.5162 0.3746 1.1583 0.3654]
+2026-06-01 19:48:38.090 | DEBUG    | __main__:main:275 - Source 1, listener 3
+2026-06-01 19:48:38.090 | INFO     | __main__:main:276 - Residue mismatch (log mag): 17.600330
+2026-06-01 19:48:38.090 | INFO     | __main__:main:277 - Reference residue: [0.6368 1.3748 3.5565 6.6233]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:280 - Candidate residue: [2.3071 0.08   0.6994 0.9484]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.090 | INFO     | __main__:main:291 - Reference listener residue [ 0.7578 -0.0155 -0.164   0.0032]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:294 - Candidate listener residue [1.5004 0.1892 1.1104 0.3891]
+2026-06-01 19:48:38.091 | DEBUG    | __main__:main:275 - Source 1, listener 4
+2026-06-01 19:48:38.091 | INFO     | __main__:main:276 - Residue mismatch (log mag): 20.777435
+2026-06-01 19:48:38.091 | INFO     | __main__:main:277 - Reference residue: [0.7384 0.0175 5.6401 7.7973]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:280 - Candidate residue: [1.9349 0.9129 0.9801 0.1099]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:291 - Reference listener residue [ 0.8388 -0.0623 -0.0204  0.001 ]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:294 - Candidate listener residue [1.0341 0.0701 0.8386 0.135 ]
+2026-06-01 19:48:38.091 | DEBUG    | __main__:main:275 - Source 1, listener 5
+2026-06-01 19:48:38.091 | INFO     | __main__:main:276 - Residue mismatch (log mag): 11.391573
+2026-06-01 19:48:38.091 | INFO     | __main__:main:277 - Reference residue: [0.8744 0.4264 3.2259 6.7646]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:280 - Candidate residue: [1.6695 0.0163 1.2631 0.3704]
+2026-06-01 19:48:38.091 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:291 - Reference listener residue [ 0.9611 -0.0937  0.2282  0.0028]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:294 - Candidate listener residue [0.7931 0.1719 0.6319 0.1041]
+2026-06-01 19:48:38.092 | DEBUG    | __main__:main:275 - Source 1, listener 6
+2026-06-01 19:48:38.092 | INFO     | __main__:main:276 - Residue mismatch (log mag): 4.067998
+2026-06-01 19:48:38.092 | INFO     | __main__:main:277 - Reference residue: [1.0295 0.8192 2.4583 6.0985]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:280 - Candidate residue: [1.3482 0.5665 1.5193 2.1966]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:291 - Reference listener residue [ 1.1224 -0.1388  0.4917 -0.0054]
+2026-06-01 19:48:38.092 | INFO     | __main__:main:294 - Candidate listener residue [0.5751 0.3078 0.4891 0.0168]
+2026-06-01 19:48:38.092 | DEBUG    | __main__:main:275 - Source 1, listener 7
+2026-06-01 19:48:38.092 | INFO     | __main__:main:276 - Residue mismatch (log mag): 12.539351
+2026-06-01 19:48:38.092 | INFO     | __main__:main:277 - Reference residue: [0.5504 4.1222 3.1802 3.3559]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:280 - Candidate residue: [2.0099 1.0702 1.2777 2.182 ]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:291 - Reference listener residue [ 0.2312  3.7755 -0.2389  0.084 ]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:294 - Candidate listener residue [ 1.1146  0.5094 -0.6227 -1.336 ]
+2026-06-01 19:48:38.093 | DEBUG    | __main__:main:275 - Source 1, listener 8
+2026-06-01 19:48:38.093 | INFO     | __main__:main:276 - Residue mismatch (log mag): 7.249131
+2026-06-01 19:48:38.093 | INFO     | __main__:main:277 - Reference residue: [0.5831 3.9083 3.6098 4.7429]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:280 - Candidate residue: [1.7025 1.6553 0.8025 1.4542]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.093 | INFO     | __main__:main:291 - Reference listener residue [ 0.2237  3.0483 -0.1554  0.021 ]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:294 - Candidate listener residue [ 0.8196  0.9145  1.0016 -0.0352]
+2026-06-01 19:48:38.094 | DEBUG    | __main__:main:275 - Source 1, listener 9
+2026-06-01 19:48:38.094 | INFO     | __main__:main:276 - Residue mismatch (log mag): 11.131132
+2026-06-01 19:48:38.094 | INFO     | __main__:main:277 - Reference residue: [0.721  3.7569 3.7067 4.9262]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:280 - Candidate residue: [1.8266 1.5379 1.2125 0.2593]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:291 - Reference listener residue [ 0.1949  2.6201 -0.1411  0.0175]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:294 - Candidate listener residue [ 0.9279  0.8132  0.6647 -0.1953]
+2026-06-01 19:48:38.094 | DEBUG    | __main__:main:275 - Source 1, listener 10
+2026-06-01 19:48:38.094 | INFO     | __main__:main:276 - Residue mismatch (log mag): 20.985026
+2026-06-01 19:48:38.094 | INFO     | __main__:main:277 - Reference residue: [0.8149 3.6131 3.8185 7.5418]
+2026-06-01 19:48:38.094 | INFO     | __main__:main:280 - Candidate residue: [1.9745 1.4794 1.7125 0.6539]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:291 - Reference listener residue [ 1.7750e-01  2.2692e+00 -1.2620e-01  1.3000e-03]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:294 - Candidate listener residue [ 1.0759  0.767   0.4032 -0.2898]
+2026-06-01 19:48:38.095 | DEBUG    | __main__:main:275 - Source 1, listener 11
+2026-06-01 19:48:38.095 | INFO     | __main__:main:276 - Residue mismatch (log mag): 16.868203
+2026-06-01 19:48:38.095 | INFO     | __main__:main:277 - Reference residue: [0.8975 3.4911 3.9081 6.0966]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:280 - Candidate residue: [2.1289 1.5269 2.036  1.0413]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:291 - Reference listener residue [ 0.1634  2.0085 -0.1154 -0.0054]
+2026-06-01 19:48:38.095 | INFO     | __main__:main:294 - Candidate listener residue [ 1.2555  0.8043  0.2917 -0.427 ]
+2026-06-01 19:48:38.095 | DEBUG    | __main__:main:275 - Source 1, listener 12
+2026-06-01 19:48:38.095 | INFO     | __main__:main:276 - Residue mismatch (log mag): 17.796109
+2026-06-01 19:48:38.096 | INFO     | __main__:main:277 - Reference residue: [0.89   3.4502 3.9857 6.6444]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:280 - Candidate residue: [2.4301 1.8999 1.4895 0.5338]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:291 - Reference listener residue [ 0.1646  1.9281 -0.1067 -0.0031]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:294 - Candidate listener residue [ 1.6967  1.1679  0.5039 -0.257 ]
+2026-06-01 19:48:38.096 | DEBUG    | __main__:main:275 - Source 1, listener 13
+2026-06-01 19:48:38.096 | INFO     | __main__:main:276 - Residue mismatch (log mag): 12.773478
+2026-06-01 19:48:38.096 | INFO     | __main__:main:277 - Reference residue: [0.7768 3.5327 3.9859 5.0193]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:280 - Candidate residue: [2.8754 2.4922 0.5411 0.0387]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:291 - Reference listener residue [ 0.1843  2.0938 -0.1067  0.0159]
+2026-06-01 19:48:38.096 | INFO     | __main__:main:294 - Candidate listener residue [2.6485 2.1117 1.3008 0.145 ]
+2026-06-01 19:48:38.097 | DEBUG    | __main__:main:275 - Source 1, listener 14
+2026-06-01 19:48:38.097 | INFO     | __main__:main:276 - Residue mismatch (log mag): 18.955891
+2026-06-01 19:48:38.097 | INFO     | __main__:main:277 - Reference residue: [0.5221 3.6029 4.2477 3.8891]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:280 - Candidate residue: [3.49   3.1479 0.184  2.4259]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:291 - Reference listener residue [ 0.2378  2.2462 -0.0821  0.0493]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:294 - Candidate listener residue [4.8971 4.0682 2.6862 1.7049]
+2026-06-01 19:48:38.097 | DEBUG    | __main__:main:275 - Source 1, listener 15
+2026-06-01 19:48:38.097 | INFO     | __main__:main:276 - Residue mismatch (log mag): 23.796623
+2026-06-01 19:48:38.097 | INFO     | __main__:main:277 - Reference residue: [0.0734 3.5036 6.0872 3.4879]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:280 - Candidate residue: [4.2283 3.6005 0.0541 2.8584]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:284 - Reference source residue [ 2.4946 16.3413 -0.1741 -0.4151]
+2026-06-01 19:48:38.097 | INFO     | __main__:main:287 - Candidate source residue [ 6.6953  5.724  -0.4475  6.6349]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:291 - Reference listener residue [ 0.3725  2.0338 -0.0131  0.0736]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:294 - Candidate listener residue [10.2457  6.3969  2.1169  2.6276]
+2026-06-01 19:48:38.098 | DEBUG    | __main__:main:275 - Source 1, listener 16
+2026-06-01 19:48:38.098 | INFO     | __main__:main:276 - Residue mismatch (log mag): 13.144126
+2026-06-01 19:48:38.098 | INFO     | __main__:main:277 - Reference residue: [0.8162 1.4408 3.4672 3.2641]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:280 - Candidate residue: [3.9718 2.884  0.1843 2.191 ]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:284 - Reference source residue [-2.4946 16.3413  0.1741 -0.4151]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:287 - Candidate source residue [-6.6953  5.724   0.4475  6.6349]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:291 - Reference listener residue [0.9067 0.2585 0.1793 0.0921]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:294 - Candidate listener residue [7.9276 3.1247 1.8585 1.3481]
+2026-06-01 19:48:38.098 | INFO     | __main__:main:298 - EDC mismatch: 36.110816 dB
+2026-06-01 19:48:38.098 | INFO     | __main__:main:304 - Best loss: 0.038079

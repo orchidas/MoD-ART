@@ -1,0 +1,479 @@
+mtllib mesh.mtl
+
+################################ Vertices
+
+v 0.000000 0.000000 0.000000                  # 1
+v 2.250000 0.000000 0.000000                  # 2
+v 2.250000 2.250000 0.000000                  # 3
+v 0.000000 2.250000 0.000000                  # 4
+v 2.250000 4.500000 0.000000                  # 5
+v 0.000000 4.500000 0.000000                  # 6
+v 2.250000 6.750000 0.000000                  # 7
+v 0.000000 6.750000 0.000000                  # 8
+v 2.250000 9.000000 0.000000                  # 9
+v 0.000000 9.000000 0.000000                  # 10
+v 2.250000 11.250000 0.000000                  # 11
+v 0.000000 11.250000 0.000000                  # 12
+v 2.250000 13.500000 0.000000                  # 13
+v 0.000000 13.500000 0.000000                  # 14
+v 2.250000 15.750000 0.000000                  # 15
+v 0.000000 15.750000 0.000000                  # 16
+v 2.250000 18.000000 0.000000                  # 17
+v 0.000000 18.000000 0.000000                  # 18
+v 4.500000 0.000000 0.000000                  # 19
+v 4.500000 2.250000 0.000000                  # 20
+v 4.500000 4.500000 0.000000                  # 21
+v 4.500000 6.750000 0.000000                  # 22
+v 4.500000 9.000000 0.000000                  # 23
+v 4.500000 11.250000 0.000000                  # 24
+v 4.500000 13.500000 0.000000                  # 25
+v 4.500000 15.750000 0.000000                  # 26
+v 4.500000 18.000000 0.000000                  # 27
+v 0.000000 0.000000 2.800000                  # 28
+v 2.250000 0.000000 2.800000                  # 29
+v 2.250000 2.250000 2.800000                  # 30
+v 0.000000 2.250000 2.800000                  # 31
+v 2.250000 4.500000 2.800000                  # 32
+v 0.000000 4.500000 2.800000                  # 33
+v 2.250000 6.750000 2.800000                  # 34
+v 0.000000 6.750000 2.800000                  # 35
+v 2.250000 9.000000 2.800000                  # 36
+v 0.000000 9.000000 2.800000                  # 37
+v 2.250000 11.250000 2.800000                  # 38
+v 0.000000 11.250000 2.800000                  # 39
+v 2.250000 13.500000 2.800000                  # 40
+v 0.000000 13.500000 2.800000                  # 41
+v 2.250000 15.750000 2.800000                  # 42
+v 0.000000 15.750000 2.800000                  # 43
+v 2.250000 18.000000 2.800000                  # 44
+v 0.000000 18.000000 2.800000                  # 45
+v 4.500000 0.000000 2.800000                  # 46
+v 4.500000 2.250000 2.800000                  # 47
+v 4.500000 4.500000 2.800000                  # 48
+v 4.500000 6.750000 2.800000                  # 49
+v 4.500000 9.000000 2.800000                  # 50
+v 4.500000 11.250000 2.800000                  # 51
+v 4.500000 13.500000 2.800000                  # 52
+v 4.500000 15.750000 2.800000                  # 53
+v 4.500000 18.000000 2.800000                  # 54
+v 0.000000 2.000000 0.000000                  # 55
+v 0.000000 2.000000 2.800000                  # 56
+v 0.000000 4.000000 0.000000                  # 57
+v 0.000000 4.000000 2.800000                  # 58
+v 0.000000 6.000000 0.000000                  # 59
+v 0.000000 6.000000 2.800000                  # 60
+v 0.000000 8.000000 0.000000                  # 61
+v 0.000000 8.000000 2.800000                  # 62
+v 0.000000 10.000000 0.000000                  # 63
+v 0.000000 10.000000 2.800000                  # 64
+v 0.000000 12.000000 0.000000                  # 65
+v 0.000000 12.000000 2.800000                  # 66
+v 0.000000 14.000000 0.000000                  # 67
+v 0.000000 14.000000 2.800000                  # 68
+v 0.000000 16.000000 0.000000                  # 69
+v 0.000000 16.000000 2.800000                  # 70
+v 1.500000 0.000000 0.000000                  # 71
+v 1.500000 0.000000 2.800000                  # 72
+v 3.000000 0.000000 0.000000                  # 73
+v 3.000000 0.000000 2.800000                  # 74
+v 1.500000 18.000000 0.000000                  # 75
+v 1.500000 18.000000 2.800000                  # 76
+v 3.000000 18.000000 0.000000                  # 77
+v 3.000000 18.000000 2.800000                  # 78
+v 4.500000 1.750000 0.000000                  # 79
+v 4.500000 1.750000 2.800000                  # 80
+v 4.500000 3.500000 0.000000                  # 81
+v 4.500000 3.500000 2.800000                  # 82
+v 4.500000 5.250000 0.000000                  # 83
+v 4.500000 5.250000 2.800000                  # 84
+v 4.500000 7.000000 0.000000                  # 85
+v 4.500000 7.000000 2.800000                  # 86
+v 4.500000 13.600000 0.000000                  # 87
+v 4.500000 18.000000 1.400000                  # 88
+v 4.500000 13.600000 1.400000                  # 89
+v 4.500000 13.600000 2.800000                  # 90
+v 4.500000 9.500000 0.000000                  # 91
+v 4.500000 9.500000 1.400000                  # 92
+v 4.500000 7.000000 1.400000                  # 93
+v 4.500000 9.500000 2.800000                  # 94
+v 4.500000 9.500000 2.000000                  # 95
+v 4.500000 10.500000 2.000000                  # 96
+v 4.500000 10.500000 2.800000                  # 97
+v 4.500000 10.500000 0.000000                  # 98
+v 4.500000 10.500000 1.400000                  # 99
+v 6.800000 7.000000 0.000000                  # 100
+v 6.800000 9.200000 0.000000                  # 101
+v 4.500000 9.200000 0.000000                  # 102
+v 6.800000 11.400000 0.000000                  # 103
+v 4.500000 11.400000 0.000000                  # 104
+v 6.800000 13.600000 0.000000                  # 105
+v 9.100000 7.000000 0.000000                  # 106
+v 9.100000 9.200000 0.000000                  # 107
+v 9.100000 11.400000 0.000000                  # 108
+v 9.100000 13.600000 0.000000                  # 109
+v 6.800000 7.000000 2.800000                  # 110
+v 6.800000 9.200000 2.800000                  # 111
+v 4.500000 9.200000 2.800000                  # 112
+v 6.800000 11.400000 2.800000                  # 113
+v 4.500000 11.400000 2.800000                  # 114
+v 6.800000 13.600000 2.800000                  # 115
+v 9.100000 7.000000 2.800000                  # 116
+v 9.100000 9.200000 2.800000                  # 117
+v 9.100000 11.400000 2.800000                  # 118
+v 9.100000 13.600000 2.800000                  # 119
+v 9.100000 10.300000 0.000000                  # 120
+v 9.100000 10.300000 1.400000                  # 121
+v 9.100000 7.000000 1.400000                  # 122
+v 9.100000 10.300000 2.800000                  # 123
+v 9.100000 13.600000 1.400000                  # 124
+v 6.033333 7.000000 0.000000                  # 125
+v 6.033333 7.000000 2.800000                  # 126
+v 7.566667 7.000000 0.000000                  # 127
+v 7.566667 7.000000 2.800000                  # 128
+v 6.033333 13.600000 0.000000                  # 129
+v 6.033333 13.600000 2.800000                  # 130
+v 7.566667 13.600000 0.000000                  # 131
+v 7.566667 13.600000 2.800000                  # 132
+
+################################ Faces
+
+usemtl Patch_1_Mat_HallwayWall
+f 1 2 3
+f 1 3 4
+
+usemtl Patch_2_Mat_HallwayWall
+f 4 3 5
+f 4 5 6
+
+usemtl Patch_3_Mat_HallwayWall
+f 6 5 7
+f 6 7 8
+
+usemtl Patch_4_Mat_HallwayWall
+f 8 7 9
+f 8 9 10
+
+usemtl Patch_5_Mat_HallwayWall
+f 10 9 11
+f 10 11 12
+
+usemtl Patch_6_Mat_HallwayWall
+f 12 11 13
+f 12 13 14
+
+usemtl Patch_7_Mat_HallwayWall
+f 14 13 15
+f 14 15 16
+
+usemtl Patch_8_Mat_HallwayWall
+f 16 15 17
+f 16 17 18
+
+usemtl Patch_9_Mat_HallwayWall
+f 2 19 20
+f 2 20 3
+
+usemtl Patch_10_Mat_HallwayWall
+f 3 20 21
+f 3 21 5
+
+usemtl Patch_11_Mat_HallwayWall
+f 5 21 22
+f 5 22 7
+
+usemtl Patch_12_Mat_HallwayWall
+f 7 22 23
+f 7 23 9
+
+usemtl Patch_13_Mat_HallwayWall
+f 9 23 24
+f 9 24 11
+
+usemtl Patch_14_Mat_HallwayWall
+f 11 24 25
+f 11 25 13
+
+usemtl Patch_15_Mat_HallwayWall
+f 13 25 26
+f 13 26 15
+
+usemtl Patch_16_Mat_HallwayWall
+f 15 26 27
+f 15 27 17
+
+usemtl Patch_17_Mat_HallwayWall
+f 28 31 30
+f 28 30 29
+
+usemtl Patch_18_Mat_HallwayWall
+f 31 33 32
+f 31 32 30
+
+usemtl Patch_19_Mat_HallwayWall
+f 33 35 34
+f 33 34 32
+
+usemtl Patch_20_Mat_HallwayWall
+f 35 37 36
+f 35 36 34
+
+usemtl Patch_21_Mat_HallwayWall
+f 37 39 38
+f 37 38 36
+
+usemtl Patch_22_Mat_HallwayWall
+f 39 41 40
+f 39 40 38
+
+usemtl Patch_23_Mat_HallwayWall
+f 41 43 42
+f 41 42 40
+
+usemtl Patch_24_Mat_HallwayWall
+f 43 45 44
+f 43 44 42
+
+usemtl Patch_25_Mat_HallwayWall
+f 29 30 47
+f 29 47 46
+
+usemtl Patch_26_Mat_HallwayWall
+f 30 32 48
+f 30 48 47
+
+usemtl Patch_27_Mat_HallwayWall
+f 32 34 49
+f 32 49 48
+
+usemtl Patch_28_Mat_HallwayWall
+f 34 36 50
+f 34 50 49
+
+usemtl Patch_29_Mat_HallwayWall
+f 36 38 51
+f 36 51 50
+
+usemtl Patch_30_Mat_HallwayWall
+f 38 40 52
+f 38 52 51
+
+usemtl Patch_31_Mat_HallwayWall
+f 40 42 53
+f 40 53 52
+
+usemtl Patch_32_Mat_HallwayWall
+f 42 44 54
+f 42 54 53
+
+usemtl Patch_33_Mat_HallwayWall
+f 1 55 56
+f 1 56 28
+
+usemtl Patch_34_Mat_HallwayWall
+f 55 57 58
+f 55 58 56
+
+usemtl Patch_35_Mat_HallwayWall
+f 57 59 60
+f 57 60 58
+
+usemtl Patch_36_Mat_HallwayWall
+f 59 61 62
+f 59 62 60
+
+usemtl Patch_37_Mat_HallwayWall
+f 61 63 64
+f 61 64 62
+
+usemtl Patch_38_Mat_HallwayWall
+f 63 65 66
+f 63 66 64
+
+usemtl Patch_39_Mat_HallwayWall
+f 65 67 68
+f 65 68 66
+
+usemtl Patch_40_Mat_HallwayWall
+f 67 69 70
+f 67 70 68
+
+usemtl Patch_41_Mat_HallwayWall
+f 69 18 45
+f 69 45 70
+
+usemtl Patch_42_Mat_HallwayWall
+f 1 28 72
+f 1 72 71
+
+usemtl Patch_43_Mat_HallwayWall
+f 71 72 74
+f 71 74 73
+
+usemtl Patch_44_Mat_HallwayWall
+f 73 74 46
+f 73 46 19
+
+usemtl Patch_45_Mat_HallwayWall
+f 18 75 76
+f 18 76 45
+
+usemtl Patch_46_Mat_HallwayWall
+f 75 77 78
+f 75 78 76
+
+usemtl Patch_47_Mat_HallwayWall
+f 77 27 54
+f 77 54 78
+
+usemtl Patch_48_Mat_HallwayWall
+f 19 46 80
+f 19 80 79
+
+usemtl Patch_49_Mat_HallwayWall
+f 79 80 82
+f 79 82 81
+
+usemtl Patch_50_Mat_HallwayWall
+f 81 82 84
+f 81 84 83
+
+usemtl Patch_51_Mat_HallwayWall
+f 83 84 86
+f 83 86 85
+
+usemtl Patch_52_Mat_HallwayWall
+f 87 89 88
+f 87 88 27
+
+usemtl Patch_53_Mat_HallwayWall
+f 89 90 54
+f 89 54 88
+
+usemtl Patch_54_Mat_HallwayWall
+f 85 93 92
+f 85 92 91
+
+usemtl Patch_55_Mat_HallwayWall
+f 93 86 94
+f 93 94 92
+
+usemtl Patch_56_Mat_HallwayWall
+f 95 94 97
+f 95 97 96
+
+usemtl Patch_57_Mat_HallwayWall
+f 98 99 89
+f 98 89 87
+
+usemtl Patch_58_Mat_HallwayWall
+f 99 97 90
+f 99 90 89
+
+usemtl Patch_59_Mat_MeetingRoomWall
+f 85 100 101
+f 85 101 102
+
+usemtl Patch_60_Mat_MeetingRoomWall
+f 102 101 103
+f 102 103 104
+
+usemtl Patch_61_Mat_MeetingRoomWall
+f 104 103 105
+f 104 105 87
+
+usemtl Patch_62_Mat_MeetingRoomWall
+f 100 106 107
+f 100 107 101
+
+usemtl Patch_63_Mat_MeetingRoomWall
+f 101 107 108
+f 101 108 103
+
+usemtl Patch_64_Mat_MeetingRoomWall
+f 103 108 109
+f 103 109 105
+
+usemtl Patch_65_Mat_MeetingRoomWall
+f 86 112 111
+f 86 111 110
+
+usemtl Patch_66_Mat_MeetingRoomWall
+f 112 114 113
+f 112 113 111
+
+usemtl Patch_67_Mat_MeetingRoomWall
+f 114 90 115
+f 114 115 113
+
+usemtl Patch_68_Mat_MeetingRoomWall
+f 110 111 117
+f 110 117 116
+
+usemtl Patch_69_Mat_MeetingRoomWall
+f 111 113 118
+f 111 118 117
+
+usemtl Patch_70_Mat_MeetingRoomWall
+f 113 115 119
+f 113 119 118
+
+usemtl Patch_71_Mat_MeetingRoomWall
+f 106 122 121
+f 106 121 120
+
+usemtl Patch_72_Mat_MeetingRoomWall
+f 122 116 123
+f 122 123 121
+
+usemtl Patch_73_Mat_MeetingRoomWall
+f 120 121 124
+f 120 124 109
+
+usemtl Patch_74_Mat_MeetingRoomWall
+f 121 123 119
+f 121 119 124
+
+usemtl Patch_75_Mat_MeetingRoomWall
+f 85 86 126
+f 85 126 125
+
+usemtl Patch_76_Mat_MeetingRoomWall
+f 125 126 128
+f 125 128 127
+
+usemtl Patch_77_Mat_MeetingRoomWall
+f 127 128 116
+f 127 116 106
+
+usemtl Patch_78_Mat_MeetingRoomWall
+f 87 129 130
+f 87 130 90
+
+usemtl Patch_79_Mat_MeetingRoomWall
+f 129 131 132
+f 129 132 130
+
+usemtl Patch_80_Mat_MeetingRoomWall
+f 131 109 119
+f 131 119 132
+
+usemtl Patch_81_Mat_MeetingRoomWall
+f 85 91 92
+f 85 92 93
+
+usemtl Patch_82_Mat_MeetingRoomWall
+f 93 92 94
+f 93 94 86
+
+usemtl Patch_83_Mat_MeetingRoomWall
+f 95 96 97
+f 95 97 94
+
+usemtl Patch_84_Mat_MeetingRoomWall
+f 98 87 89
+f 98 89 99
+
+usemtl Patch_85_Mat_MeetingRoomWall
+f 99 89 90
+f 99 90 97
+

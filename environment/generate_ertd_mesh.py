@@ -318,18 +318,15 @@ def _emit_rect_grid(
                                         desired_normal)
 
 
-def generate_mesh(output_dir: Path, patch_area: float, hallway: MaterialStyle,
-                  meeting: MaterialStyle) -> None:
+def generate_mesh(output_dir: Path, patch_area: float,
+                  which_ertd: int) -> None:
     """Generate `mesh.obj` and `mesh.mtl` for the ERTD coupled-room geometry.
 
     Args:
         output_dir (pathlib.Path): Destination directory where files are
             written.
         patch_area (float): Target area (m^2) per rectangular surface patch.
-        hallway (MaterialStyle): Material style assigned to hallway room
-            surfaces and hallway side of shared wall.
-        meeting (MaterialStyle): Material style assigned to meeting room
-            surfaces and meeting side of shared wall.
+        which_ertd (int): which ERTD dataset are we simulating?
 
     Returns:
         None
@@ -345,65 +342,95 @@ def generate_mesh(output_dir: Path, patch_area: float, hallway: MaterialStyle,
     output_dir.mkdir(parents=True, exist_ok=True)
     b = ObjBuilder()
 
+    hallway_left = MaterialStyle("HallwayLeftWall", tuple(args.hallway_kd))
+    hallway_right = MaterialStyle("HallwayRightWall", tuple(args.hallway_kd))
+    hallway_floor = MaterialStyle("HallwayFloor", tuple(args.hallway_kd))
+    hallway_ceiling = MaterialStyle("HallwayCeiling", tuple(args.hallway_kd))
+    hallway_front = MaterialStyle("HallwayFrontWall", tuple(args.hallway_kd))
+    hallway_back = MaterialStyle("HallwayBackWall", tuple(args.hallway_kd))
+
+    meeting_left = MaterialStyle("MeetingLeftWall", tuple(args.meeting_kd))
+    meeting_right = MaterialStyle("MeetingRightWall", tuple(args.meeting_kd))
+    meeting_floor = MaterialStyle("MeetingFloor", tuple(args.meeting_kd))
+    meeting_ceiling = MaterialStyle("MeetingCeiling", tuple(args.meeting_kd))
+    meeting_front = MaterialStyle("MeetingFrontWall", tuple(args.meeting_kd))
+    meeting_back = MaterialStyle("MeetingBackWall", tuple(args.meeting_kd))
+
     # Room 1 (hallway)
-    _emit_rect_grid(b, hallway.name, "z", 0.0, (0.0, 4.5), (0.0, 18.0),
+    _emit_rect_grid(b, hallway_floor.name, "z", 0.0, (0.0, 4.5), (0.0, 18.0),
                     (0.0, 0.0, 1.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "z", 2.8, (0.0, 4.5), (0.0, 18.0),
+    _emit_rect_grid(b, hallway_ceiling.name, "z", 2.8, (0.0, 4.5), (0.0, 18.0),
                     (0.0, 0.0, -1.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "x", 0.0, (0.0, 18.0), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_left.name, "x", 0.0, (0.0, 18.0), (0.0, 2.8),
                     (1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "y", 0.0, (0.0, 4.5), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_back.name, "y", 0.0, (0.0, 4.5), (0.0, 2.8),
                     (0.0, 1.0, 0.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "y", 18.0, (0.0, 4.5), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_front.name, "y", 18.0, (0.0, 4.5), (0.0, 2.8),
                     (0.0, -1.0, 0.0), patch_area)
 
     # Room 1: shared wall exterior segments (outside overlap with room 2)
-    _emit_rect_grid(b, hallway.name, "x", 4.5, (0.0, 7.0), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_right.name, "x", 4.5, (0.0, 7.0), (0.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "x", 4.5, (13.6, 18.0), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_right.name, "x", 4.5, (13.6, 18.0), (0.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
 
     # Room 1: shared wall overlap with aperture cutout (y in [7,13.6], z in [0,2.8] minus door)
-    _emit_rect_grid(b, hallway.name, "x", 4.5, (7.0, 9.5), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_right.name, "x", 4.5, (7.0, 9.5), (0.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "x", 4.5, (9.5, 10.5), (2.0, 2.8),
+    _emit_rect_grid(b, hallway_right.name, "x", 4.5, (9.5, 10.5), (2.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, hallway.name, "x", 4.5, (10.5, 13.6), (0.0, 2.8),
+    _emit_rect_grid(b, hallway_right.name, "x", 4.5, (10.5, 13.6), (0.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
 
     # Room 2 (meeting room)
-    _emit_rect_grid(b, meeting.name, "z", 0.0, (4.5, 9.1), (7.0, 13.6),
+    _emit_rect_grid(b, meeting_floor.name, "z", 0.0, (4.5, 9.1), (7.0, 13.6),
                     (0.0, 0.0, 1.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "z", 2.8, (4.5, 9.1), (7.0, 13.6),
+    _emit_rect_grid(b, meeting_ceiling.name, "z", 2.8, (4.5, 9.1), (7.0, 13.6),
                     (0.0, 0.0, -1.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "x", 9.1, (7.0, 13.6), (0.0, 2.8),
+    _emit_rect_grid(b, meeting_right.name, "x", 9.1, (7.0, 13.6), (0.0, 2.8),
                     (-1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "y", 7.0, (4.5, 9.1), (0.0, 2.8),
+    _emit_rect_grid(b, meeting_back.name, "y", 7.0, (4.5, 9.1), (0.0, 2.8),
                     (0.0, 1.0, 0.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "y", 13.6, (4.5, 9.1), (0.0, 2.8),
+    _emit_rect_grid(b, meeting_front.name, "y", 13.6, (4.5, 9.1), (0.0, 2.8),
                     (0.0, -1.0, 0.0), patch_area)
 
     # Room 2: shared wall overlap with aperture cutout (opposite normal)
-    _emit_rect_grid(b, meeting.name, "x", 4.5, (7.0, 9.5), (0.0, 2.8),
+    _emit_rect_grid(b, meeting_left.name, "x", 4.5, (7.0, 9.5), (0.0, 2.8),
                     (1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "x", 4.5, (9.5, 10.5), (2.0, 2.8),
+    _emit_rect_grid(b, meeting_left.name, "x", 4.5, (9.5, 10.5), (2.0, 2.8),
                     (1.0, 0.0, 0.0), patch_area)
-    _emit_rect_grid(b, meeting.name, "x", 4.5, (10.5, 13.6), (0.0, 2.8),
+    _emit_rect_grid(b, meeting_left.name, "x", 4.5, (10.5, 13.6), (0.0, 2.8),
                     (1.0, 0.0, 0.0), patch_area)
 
     patch_tags = [mat for mat, _ in b.patches]
     b.write_obj(output_dir / "mesh.obj")
-    b.write_mtl(output_dir / "mesh.mtl", [hallway, meeting], patch_tags)
-    _write_materials_csv(output_dir, hallway.name, meeting.name)
+    b.write_mtl(
+        output_dir / "mesh.mtl",
+        [
+            hallway_floor,
+            hallway_ceiling,
+            hallway_left,
+            hallway_right,
+            hallway_front,
+            hallway_back,
+            meeting_floor,
+            meeting_ceiling,
+            meeting_left,
+            meeting_right,
+            meeting_front,
+            meeting_back,
+        ],
+        patch_tags,
+    )
+    _write_materials_csv(output_dir, which_ertd)
 
 
-def _write_materials_csv(output_dir: Path, hallway_mat: str,
-                         meeting_mat: str) -> None:
+def _write_materials_csv(output_dir: Path, which_ertd: int) -> None:
     """Write the default ERTD broadband materials.csv into `output_dir`.
 
     Coefficients match the current project setup:
-      - hallway absorption = 0.042, scattering = 0.12
-      - meeting absorption = 0.12, scattering = 0.12
+      - hallway absorption = 0.042, scattering = 0.01
+      - meeting absorption = 0.12, scattering = 0.01
 
     Args:
         output_dir (pathlib.Path): Destination folder where `materials.csv`
@@ -415,14 +442,34 @@ def _write_materials_csv(output_dir: Path, hallway_mat: str,
     Returns:
         None
     """
-    content = (
-        "Frequencies\n"
-        f"{hallway_mat}, 0.042\n"
-        f"{hallway_mat}, 0.12\n"
-        f"{meeting_mat}, 0.12\n"
-        f"{meeting_mat}, 0.12\n"
+
+    hallway_right_abs = 0.48 if which_ertd == 2 else 0.042
+
+    materials = {
+        "HallwayLeftWall": 0.042,
+        "HallwayRightWall": hallway_right_abs,
+        "HallwayFrontWall": 0.042,
+        "HallwayBackWall": 0.042,
+        "HallwayFloor": 0.042,
+        "HallwayCeiling": 0.042,
+        "MeetingLeftWall": 0.12,
+        "MeetingRightWall": 0.12,
+        "MeetingFrontWall": 0.12,
+        "MeetingBackWall": 0.12,
+        "MeetingFloor": 0.12,
+        "MeetingCeiling": 0.12,
+    }
+
+    lines = ["Frequencies"]
+
+    for name, absorption in materials.items():
+        lines.append(f"{name}, {absorption}")
+        lines.append(f"{name}, 0.01")
+
+    (output_dir / "materials.csv").write_text(
+        "\n".join(lines) + "\n",
+        encoding="utf-8",
     )
-    (output_dir / "materials.csv").write_text(content, encoding="utf-8")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -457,6 +504,8 @@ def _parse_args() -> argparse.Namespace:
                    type=float,
                    nargs=3,
                    default=(0.35, 0.62, 0.82))
+    parser.add_argument("--which-ertd", type=int, default=1)
+
     return p.parse_args()
 
 
@@ -473,12 +522,10 @@ def main() -> None:
         None
     """
     args = _parse_args()
-    hallway = MaterialStyle(args.hallway_material, tuple(args.hallway_kd))
-    meeting = MaterialStyle(args.meeting_material, tuple(args.meeting_kd))
 
     final_output_dir = Path(
         f"{args.output_dir}_patch_area={args.patch_area:.1f}")
-    generate_mesh(final_output_dir, args.patch_area, hallway, meeting)
+    generate_mesh(final_output_dir, args.patch_area, args.which_ertd)
     print(f"Wrote {final_output_dir / 'mesh.obj'}")
     print(f"Wrote {final_output_dir / 'mesh.mtl'}")
 
