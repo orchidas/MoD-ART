@@ -443,11 +443,12 @@ def _write_materials_csv(output_dir: Path, which_ertd: int) -> None:
         None
     """
 
-    hallway_right_abs = 0.48 if which_ertd == 2 else 0.042
+    # left and right are flipped in this case
+    hallway_left_abs = 0.48 if which_ertd == 2 else 0.042
 
     materials = {
-        "HallwayLeftWall": 0.042,
-        "HallwayRightWall": hallway_right_abs,
+        "HallwayLeftWall": hallway_left_abs,
+        "HallwayRightWall": 0.042,
         "HallwayFrontWall": 0.042,
         "HallwayBackWall": 0.042,
         "HallwayFloor": 0.042,

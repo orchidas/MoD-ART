@@ -5,7 +5,7 @@ HallwayFloor, 0.01
 HallwayCeiling, 0.042
 HallwayCeiling, 0.01
 
-HallwayLeftWall, 0.042
+HallwayLeftWall, 0.48
 HallwayLeftWall, 0.01
 
 HallwayBackWall, 0.042
@@ -14,7 +14,7 @@ HallwayBackWall, 0.01
 HallwayFrontWall, 0.042
 HallwayFrontWall, 0.01
 
-HallwayRightWall, 0.48
+HallwayRightWall, 0.042
 HallwayRightWall, 0.01
 
 MeetingFloor, 0.12
