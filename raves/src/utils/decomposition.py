@@ -28,9 +28,9 @@ def eig_to_T60(eigenvalue: float, fs: float) -> float:
     float
         Reverberation time in seconds.
     """
-    if np.abs(eigenvalue) >= 1:
+    if np.any(np.abs(eigenvalue) >= 1):
         return np.inf
-    elif np.abs(eigenvalue) == 0:
+    elif np.any(np.abs(eigenvalue) == 0):
         return 0.
     else:
         return -6 / (np.log10(np.abs(eigenvalue)) * fs)
@@ -66,17 +66,19 @@ def T60_to_eig(T60: float, fs: float) -> float:
         return 1.
 
 
-
-def build_ssm(kernel: csr_array, m: np.ndarray,
-              element_wise_assembly: bool = True
-              ) -> csr_array:
+def build_ssm(kernel, m: np.ndarray, element_wise_assembly: bool = True) -> csr_array:
     """
     Construct the sparse state transition matrix for an FDN-like system.
 
-    Given an N x N feedback matrix and N integer delay lengths `m` (each
-    at least 3), this builds the state transition matrix (size sum(m) x sum(m))
-    that advances all inner states by one sample and feeds the last samples
-    through the feedback matrix and then into the first samples.
+    Given an N x N feedback matrix and N integer delay lengths `m`, this builds
+    the state transition matrix that advances all inner states by one sample
+    and feeds the last samples through the feedback matrix and then into the
+    first samples.
+
+    Two kernel formats are supported:
+    - 2D `(N, N)`: the original single-tap ART / FDN feedback matrix.
+    - 3D `(N, N, L)`: a tapped FIR feedback matrix, where the state is
+      extended with `L-1` history vectors of last-sample values.
 
     Two assembly modes are supported:
     - element_wise_assembly=True: set individual nonzeros directly in a LIL
@@ -91,10 +93,12 @@ def build_ssm(kernel: csr_array, m: np.ndarray,
 
     Parameters
     ----------
-    kernel : scipy.sparse.csr_array
-        Feedback matrix of shape (N, N), where N == len(m).
+    kernel : scipy.sparse.csr_array or numpy.ndarray
+        Feedback matrix of shape `(N, N)` or FIR feedback tensor of shape
+        `(N, N, L)`, where `N == len(m)`.
     m : array_like of int
-        Per-line integer delay lengths; each m_i must be >= 3.
+        Per-line integer delay lengths. For 2D kernels each `m_i` must be at
+        least 3. For 3D FIR kernels each `m_i` must be at least 1.
     element_wise_assembly : bool, default True
         If True, assemble by writing individual entries.
         If False, assemble from sparse blocks.
@@ -102,13 +106,15 @@ def build_ssm(kernel: csr_array, m: np.ndarray,
     Returns
     -------
     csr_array
-        Sparse state transition matrix of shape (sum(m), sum(m)).
+        Sparse state transition matrix. For 2D kernels the shape is
+        `(sum(m), sum(m))`. For 3D FIR kernels the shape is
+        `(sum(m) + N * (L - 1), sum(m) + N * (L - 1))`.
 
     Raises
     ------
     AssertionError
-        If any m_i < 3, if any m_i is non-integer, or if `kernel` is not
-        square with size equal to len(m).
+        If the delay constraints are violated or if `kernel` does not match
+        `len(m)`.
 
     Notes
     -----
@@ -116,12 +122,50 @@ def build_ssm(kernel: csr_array, m: np.ndarray,
     block rows 0..N-1 contain U_i and R_i, row N contains P_j, and the last
     block row places `kernel` beneath the P row.
     """
-    assert np.all(m > 2), 'The delay lengths `m` must be at least 3.'
     assert np.all(np.mod(m, 1) == 0), 'The delay lengths `m` must be integer.'
     m = m.astype(int)
 
     # N is the number of delay lines.
     N = len(m)
+    kernel_ndim = getattr(kernel, "ndim", len(getattr(kernel, "shape", ())))
+    if kernel_ndim == 3:
+        kernel = np.asarray(kernel)
+        assert kernel.shape[:2] == (N, N), 'The matrix `A` must be square and have the same size as `m`.'
+        assert np.all(m > 0), 'The delay lengths `m` must be at least 1 for FIR kernels.'
+        if not element_wise_assembly:
+            raise NotImplementedError('Block assembly is only implemented for 2D kernels.')
+
+        num_taps = kernel.shape[2]
+        line_state_dim = int(np.sum(m))
+        history_dim = N * max(0, num_taps - 1)
+        total_dim = line_state_dim + history_dim
+        AA = lil_array((total_dim, total_dim))
+        line_offsets = np.concatenate(([0], np.cumsum(m)))
+        last_indices = line_offsets[1:] - 1
+
+        for dst_idx in range(N):
+            start = int(line_offsets[dst_idx])
+            delay = int(m[dst_idx])
+            for tap_idx in range(1, delay):
+                AA[start + tap_idx, start + tap_idx - 1] = 1
+
+            AA[start, last_indices] = kernel[dst_idx, :, 0]
+            for tap_idx in range(1, num_taps):
+                hist_offset = line_state_dim + (tap_idx - 1) * N
+                AA[start, hist_offset:hist_offset + N] = kernel[dst_idx, :, tap_idx]
+
+        if num_taps > 1:
+            hist_start = line_state_dim
+            for path_idx, last_idx in enumerate(last_indices):
+                AA[hist_start + path_idx, last_idx] = 1
+            for tap_idx in range(1, num_taps - 1):
+                src = hist_start + (tap_idx - 1) * N
+                dst = hist_start + tap_idx * N
+                AA[dst:dst + N, src:src + N] = np.eye(N)
+
+        return csr_array(AA)
+
+    assert np.all(m > 2), 'The delay lengths `m` must be at least 3.'
     assert kernel.shape == (N, N), 'The matrix `A` must be square and have the same size as `m`.'
 
     if element_wise_assembly:
@@ -133,31 +177,31 @@ def build_ssm(kernel: csr_array, m: np.ndarray,
 
         # Figure out which (column) indices are "missing" from the off-diagonal.
         # The way this is used will be clear later.
-        skipped_cols = np.cumsum(m-2)
+        skipped_cols = np.cumsum(m - 2)
 
         # This will keep track of how many lines (missing diagonal entries) have been handled.
         handled = 0
         # Iterate over columns of the SSM.
-        for i in range(M - (2*N) + 1):
+        for i in range(M - (2 * N) + 1):
             if i == 0 or i in skipped_cols:
                 # This column has NO nonzero element on the off-diagonal (previous row).
                 # Instead, the nonzero element on this column is:
                 if handled != N:
-                    AA[M - (2*N) + handled, i] = 1
+                    AA[M - (2 * N) + handled, i] = 1
                 # And the nonzero element on the previous row is:
                 if i != 0:
-                    AA[i-1, M - N + handled - 1] = 1
+                    AA[i - 1, M - N + handled - 1] = 1
                 # Increment the number of "skips" that have been handled.
                 handled += 1
             else:
                 # This column has a nonzero element on the off-diagonal (previous row).
-                AA[i-1, i] = 1
+                AA[i - 1, i] = 1
 
         # Finally, insert the (nonzero) elements of the feedback matrix A in their slot.
         # https://stackoverflow.com/a/4319087
         coo_A = coo_array(kernel)
         for i, j, v in zip(coo_A.row, coo_A.col, coo_A.data):
-            AA[M - N + i, M - (2*N) + j] = v
+            AA[M - N + i, M - (2 * N) + j] = v
 
         return csr_array(AA)
     else:
@@ -230,8 +274,7 @@ def real_positive_search(ssm: csr_array,
                          T60_thresh: float,
                          num_thresh: int,
                          sample_rate: float = 5e3,
-                         imaginary_part_thresh: float = 1e-7
-                         ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                         imaginary_part_thresh: float = 1e-7) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Find real, positive eigenpairs of a sparse state matrix. Left and right
     eigenvectors are found separately, linked in pairs, and calibrated.
@@ -331,7 +374,8 @@ def real_positive_search(ssm: csr_array,
                 break
         # Consider the "lowest located mode" stopping condition.
         if T60_thresh is not None:
-            print('\t\t\tLowest found T60 is {:.0f}% of stopping value.'.format(100. * np.log10(mag_thresh) / np.log10(np.min(right_vals))))
+            print('\t\t\tLowest found T60 is {:.0f}% of stopping value.'.format(100. * np.log10(mag_thresh) /
+                                                                                np.log10(np.min(right_vals))))
             if np.min(right_vals) <= mag_thresh:
                 break
         # If the search failed, it has no chance of succeeding at the next loop.
@@ -386,8 +430,8 @@ def real_positive_search(ssm: csr_array,
                 continue
 
             if old_right_idx in right_rearrangement:
-                warnings.warn('Two right values want to be mapped to the same left value. '
-                              + 'Right ' + str(right_vals[old_right_idx]) + ', left ' + str(left_vals[old_left_idx]))
+                warnings.warn('Two right values want to be mapped to the same left value. ' + 'Right ' +
+                              str(right_vals[old_right_idx]) + ', left ' + str(left_vals[old_left_idx]))
 
             right_rearrangement[num_valid_matches] = old_right_idx
             left_rearrangement[num_valid_matches] = old_left_idx
@@ -403,8 +447,8 @@ def real_positive_search(ssm: csr_array,
                 continue
 
             if old_left_idx in left_rearrangement:
-                warnings.warn('Two left values want to be mapped to the same right value. '
-                              + 'Right ' + str(right_vals[old_right_idx]) + ', left ' + str(left_vals[old_left_idx]))
+                warnings.warn('Two left values want to be mapped to the same right value. ' + 'Right ' +
+                              str(right_vals[old_right_idx]) + ', left ' + str(left_vals[old_left_idx]))
 
             right_rearrangement[num_valid_matches] = old_right_idx
             left_rearrangement[num_valid_matches] = old_left_idx
@@ -414,8 +458,8 @@ def real_positive_search(ssm: csr_array,
     if num_valid_matches == 0:
         warnings.warn('No eigenvalues were shared between left and right.')
     if num_valid_matches < max_num_valid:
-        warnings.warn('Some eigenvalues were not shared between left and right: '
-                      + str(num_valid_matches) + '/' + str(max_num_valid))
+        warnings.warn('Some eigenvalues were not shared between left and right: ' + str(num_valid_matches) + '/' +
+                      str(max_num_valid))
 
     # Remove unassigned (invalid) entries on both sides.
     right_rearrangement = right_rearrangement[:num_valid_matches]
